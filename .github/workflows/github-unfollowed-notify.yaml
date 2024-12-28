@@ -6,7 +6,7 @@ on:
     - cron: '*/5 * * * *'
 
   # Optional: You can also allow manual runs
-  workflow_dispatch:
+  #workflow_dispatch:
 
 jobs:
   my_job:
