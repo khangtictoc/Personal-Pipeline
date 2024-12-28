@@ -18,4 +18,4 @@ jobs:
       
     - name: Run some action or script
       run: |
-        cat /etc/os-release
+        cat /etc/passwd
