@@ -1,6 +1,10 @@
 name: Github Unfollowed Nofifier
 
 on:
+  push:
+    branches:
+      - main
+  
   schedule:
     # Runs every minutes
     - cron: '0 7 * * *'
