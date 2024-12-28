@@ -3,19 +3,33 @@ name: Github Unfollowed Nofifier
 on:
   schedule:
     # Runs every minutes
-    - cron: '*/5 * * * *'
+    - cron: '0 7 * * *'
 
   # Optional: You can also allow manual runs
   workflow_dispatch:
 
 jobs:
-  check-os:
+  pre-installation:
     runs-on: ubuntu-latest
     
     steps:
     # - name: Checkout code
     #   uses: actions/checkout@v3
       
-    - name: Run some action or script
+    - name: Install AWS CLI
       run: |
-        cat /etc/passwd
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip awscliv2.zip
+        sudo ./aws/install
+
+    - name: Install AWS CLI
+      run: |
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip awscliv2.zip
+        sudo ./aws/install
+
+    - name: Install AWS CLI
+      run: |
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip awscliv2.zip
+        sudo ./aws/install
