@@ -1,0 +1,22 @@
+name: Github Unfollowed Nofifier
+
+on:
+  schedule:
+    # Runs every minutes
+    - cron: '*/5 * * * *'
+
+  # Optional: You can also allow manual runs
+  workflow_dispatch:
+
+jobs:
+  my_job:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Run some action or script
+      run: |
+        echo "This is my pipeline running at 7:00 AM every day."
+        # Add your pipeline's steps here
