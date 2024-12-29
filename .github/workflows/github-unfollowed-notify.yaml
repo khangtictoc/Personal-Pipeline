@@ -149,7 +149,7 @@ jobs:
           <body>
             <div class="email-container">
               <div class="email-header">
-                <img src="https://via.placeholder.com/150x50?text=Logo" alt="Company Logo">
+                <img src="" alt="Company Logo">
                 <h2>Welcome to AWS SES</h2>
               </div>
               <div class="email-content">
