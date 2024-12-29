@@ -89,6 +89,7 @@ jobs:
 
         sed -i "s|<ul id=\"new-followers\">|<ul id=\"new-followers\">$followers_list|" "$EMAIL_TEMPLATE_FILE"
         sed -i "s|<ul id=\"left-followers\">|<ul id=\"left-followers\">$unfollowers_list|" "$EMAIL_TEMPLATE_FILE"
+        cat $EMAIL_TEMPLATE_FILE
     - name: Send Email notification
       run: |
         HTML_BODY=$(cat $EMAIL_TEMPLATE_FILE)
