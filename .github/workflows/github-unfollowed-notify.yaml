@@ -79,10 +79,75 @@ jobs:
         HTML_BODY=$(cat <<EOF
         <!DOCTYPE html>
         <html>
-        <body>
-        <h1>Welcome to AWS SES</h1>
-        <p>This is an example email in HTML format.</p>
-        </body>
+          <head>
+            <style>
+              body {
+                margin: 0;
+                padding: 0;
+                font-family: Arial, sans-serif;
+                background: linear-gradient(to right, #4facfe, #00f2fe);
+                color: #333;
+              }
+              .email-container {
+                max-width: 600px;
+                margin: 20px auto;
+                background: #ffffff;
+                border-radius: 10px;
+                overflow: hidden;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+              }
+              .email-header {
+                background: linear-gradient(to right, #ff7eb3, #ff758c);
+                color: white;
+                padding: 20px;
+                text-align: center;
+              }
+              .email-header img {
+                max-height: 50px;
+                margin-bottom: 10px;
+              }
+              .email-content {
+                padding: 20px;
+                text-align: center;
+              }
+              .email-content h1 {
+                font-size: 28px;
+                color: #333;
+              }
+              .email-content p {
+                font-size: 16px;
+                color: #555;
+                line-height: 1.6;
+              }
+              .email-footer {
+                background: #f4f4f4;
+                padding: 10px;
+                text-align: center;
+                font-size: 14px;
+                color: #888;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="email-container">
+              <div class="email-header">
+                <img src="https://i.imgur.com/XeGbdSg.png" alt="Company Logo">
+                <h2>Welcome to AWS SES</h2>
+              </div>
+              <div class="email-content">
+                <h1>Hello!</h1>
+                <p>
+                  Thank you for choosing AWS Simple Email Service. This is an example of a beautifully designed email in HTML format.
+                </p>
+                <p>
+                  We hope you enjoy using our service!
+                </p>
+              </div>
+              <div class="email-footer">
+                <p>© 2024 Your Company Name. All rights reserved.</p>
+              </div>
+            </div>
+          </body>
         </html>
         EOF
         )
