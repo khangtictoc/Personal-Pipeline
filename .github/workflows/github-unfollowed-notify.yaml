@@ -84,27 +84,29 @@ jobs:
               body {
                 margin: 0;
                 padding: 0;
-                font-family: Arial, sans-serif;
-                background: linear-gradient(to right, #4facfe, #00f2fe);
-                color: #333;
+                font-family: 'Arial', sans-serif;
+                background: linear-gradient(to bottom, #1a1a40, #3a3a6b);
+                color: #d1d1e0;
               }
               .email-container {
                 max-width: 600px;
                 margin: 20px auto;
-                background: #ffffff;
+                background: #282850;
                 border-radius: 10px;
                 overflow: hidden;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+                color: #f3f3ff;
               }
               .email-header {
-                background: linear-gradient(to right, #ff7eb3, #ff758c);
-                color: white;
+                background: linear-gradient(to right, #6a1b9a, #8e24aa);
+                color: #f5f5f5;
                 padding: 20px;
                 text-align: center;
               }
               .email-header img {
                 max-height: 50px;
                 margin-bottom: 10px;
+                border-radius: 5px;
               }
               .email-content {
                 padding: 20px;
@@ -112,36 +114,54 @@ jobs:
               }
               .email-content h1 {
                 font-size: 28px;
-                color: #333;
+                color: #e1bee7;
+                margin-bottom: 10px;
               }
               .email-content p {
                 font-size: 16px;
-                color: #555;
+                color: #c5cae9;
                 line-height: 1.6;
               }
+              .button {
+                display: inline-block;
+                margin-top: 20px;
+                padding: 10px 20px;
+                font-size: 16px;
+                color: #ffffff;
+                background-color: #6a1b9a;
+                text-decoration: none;
+                border-radius: 5px;
+                box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+                transition: background-color 0.3s ease;
+              }
+              .button:hover {
+                background-color: #8e24aa;
+              }
               .email-footer {
-                background: #f4f4f4;
+                background: #1e1e30;
                 padding: 10px;
                 text-align: center;
                 font-size: 14px;
-                color: #888;
+                color: #8888aa;
               }
             </style>
           </head>
           <body>
             <div class="email-container">
               <div class="email-header">
-                <img src="https://i.imgur.com/XeGbdSg.png" alt="Company Logo">
+                <img src="https://via.placeholder.com/150x50?text=Logo" alt="Company Logo">
                 <h2>Welcome to AWS SES</h2>
               </div>
               <div class="email-content">
-                <h1>Hello!</h1>
+                <h1>Hello, Night Owl!</h1>
                 <p>
-                  Thank you for choosing AWS Simple Email Service. This is an example of a beautifully designed email in HTML format.
+                  Experience the power of AWS Simple Email Service with this sleek night-themed email. 
+                  We love the night vibes, and we hope you do too!
                 </p>
                 <p>
-                  We hope you enjoy using our service!
+                  Click the button below to get started and explore more.
                 </p>
+                <a href="https://aws.amazon.com/ses" class="button">Get Started</a>
               </div>
               <div class="email-footer">
                 <p>© 2024 Your Company Name. All rights reserved.</p>
