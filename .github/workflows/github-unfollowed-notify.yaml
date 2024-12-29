@@ -84,7 +84,7 @@ jobs:
               body {
                 margin: 0;
                 padding: 0;
-                font-family: 'Arial', sans-serif;
+                font-family: Arial, sans-serif;
                 background: linear-gradient(to bottom, #1a1a40, #3a3a6b);
                 color: #d1d1e0;
               }
