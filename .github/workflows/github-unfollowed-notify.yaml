@@ -79,12 +79,12 @@ jobs:
       run: |
         followers_list=""
         while IFS= read -r follow; do
-          followers_list+="<li>${follow}</li>"$'\n'
+          followers_list+="<li>${follow}</li>"
         done < "new_followed.txt"
 
         unfollowers_list=""
         while IFS= read -r unfollow; do
-          unfollowers_list+="<li>${unfollow}</li>"$'\n'
+          unfollowers_list+="<li>${unfollow}</li>"
         done < "new_unfollowed.txt"
 
         sed -i "s|<ul id=\"new-followers\">|<ul id=\"new-followers\">$followers_list|" "$EMAIL_TEMPLATE_FILE"
