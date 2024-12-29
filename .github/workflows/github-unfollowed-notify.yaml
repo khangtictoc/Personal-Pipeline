@@ -47,18 +47,30 @@ jobs:
         -H "Accept: application/vnd.github+json" \
         -H "Authorization: Bearer ${{ secrets.PAT_GITHUB }}" \
         -H "X-GitHub-Api-Version: 2022-11-28" \
-        https://api.github.com/user/followers 
+        https://api.github.com/user/followers | jq '.[].login' > crt_followers.txt
+        echo Current Followers:
+        cat crt_followers.txt
         
+    
+    - name: Download status files from S3 Bucket
+      run: |
+        aws s3 sync s3://github-management/follower-control/ . --recursive
+  
+    - name: Show added and deleted users
+      run: |
+        diff -u follower-control/saved_followers.txt crt_followers.txt  | grep '^+' | sed 's/^+//' > new_followed.txt
+        diff -u follower-control/saved_followers.txt crt_followers.txt  | grep '^-' | sed 's/^-//' > new_unfollowed.txt
+        echo "NEW FOLLOWED USERS: "
+        cat new_followed.txt
+        echo "NEW UNFOLLOWED USERS: "
+        cat new_unfollowed.txt
 
-    # - name: Show added and deleted users
-    #   run: |
-    #     diff -u file1.txt file2.txt | grep '^+' | sed 's/^+//' > new_followed.txt
-    #     diff -u file1.txt file2.txt | grep '^-' | sed 's/^-//' > new_unfollowed.txt
-    #     echo "NEW FOLLOWED USERS: "
-    #     cat new_followed.txt
-    #     echo "NEW UNFOLLOWED USERS: "
-    #     cat new_unfollowed.txt
+    - name: Check conditions and upload to S3 Bucket
+      run: |
+        if [ -s new_followed.txt ] || [ -s new_unfollowed.txt ]; then
+            aws s3 cp crt_followers.txt s3://github-management/follower-control/saved_followers.txt --force
+        else
+            echo "No new or abandon followers, no action performed."
+        fi
 
-    # - name: Install AWS CLI
-    #   run: |
         
