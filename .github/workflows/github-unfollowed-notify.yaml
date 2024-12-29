@@ -15,6 +15,7 @@ on:
 env:
   AWS_REGION: us-east-1
   AWS_OUTPUT: json
+  EMAIL_TEMPLATE_FILE: samples/mail_template.html
 
 jobs:
   pre-installation:
@@ -66,17 +67,31 @@ jobs:
         echo "NEW UNFOLLOWED USERS: "
         cat new_unfollowed.txt
 
-    - name: Check conditions and upload to S3 Bucket
+    - name: Upload to S3 and sending Email if changes exists
       run: |
         if [ -s new_followed.txt ] || [ -s new_unfollowed.txt ]; then
             aws s3 cp crt_followers.txt s3://github-management/follower-control/saved_followers.txt --force
         else
             echo "No new or abandon followers, no action performed."
         fi
+    
+    - name: Prepare for Email Templating
+      run: |
+        followers_list=""
+        while IFS= read -r follow; do
+          followers_list+="<li>${follow}</li>"$'\n'
+        done < "new_followed.txt"
 
+        unfollowers_list=""
+        while IFS= read -r unfollow; do
+          unfollowers_list+="<li>${unfollow}</li>"$'\n'
+        done < "new_unfollowed.txt"
+
+        sed -i "s|<ul id=\"new-followers\">|<ul id=\"new-followers\">$followers_list|" "$EMAIL_TEMPLATE_FILE"
+        sed -i "s|<ul id=\"left-followers\">|<ul id=\"left-followers\">$unfollowers_list|" "$EMAIL_TEMPLATE_FILE"
     - name: Send Email notification
       run: |
-        HTML_BODY=$(cat samples/mail_template.html)
+        HTML_BODY=$(cat $EMAIL_TEMPLATE_FILE)
 
         aws ses send-email \
           --from "tranhoangkhang09112001@gmail.com" \
