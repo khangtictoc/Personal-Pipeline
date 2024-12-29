@@ -59,8 +59,8 @@ jobs:
   
     - name: Show added and deleted users
       run: |
-        diff -u follower-control/saved_followers.txt crt_followers.txt  | grep '^+' | sed 's/^+//' > new_followed.txt
-        diff -u follower-control/saved_followers.txt crt_followers.txt  | grep '^-' | sed 's/^-//' > new_unfollowed.txt
+        diff -u -b saved_followers.txt crt_followers.txt  | grep '^+' | sed 's/^+//' > new_followed.txt
+        diff -u -b saved_followers.txt crt_followers.txt  | grep '^-' | sed 's/^-//' > new_unfollowed.txt
         echo "NEW FOLLOWED USERS: "
         cat new_followed.txt
         echo "NEW UNFOLLOWED USERS: "
