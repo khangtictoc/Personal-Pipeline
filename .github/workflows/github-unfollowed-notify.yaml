@@ -76,7 +76,7 @@ jobs:
 
     - name: Send Email notification
       run: |
-        HTML_BODY=$(cat mail_template.html)
+        HTML_BODY=$(cat samples/mail_template.html)
 
         aws ses send-email \
           --from "tranhoangkhang09112001@gmail.com" \
