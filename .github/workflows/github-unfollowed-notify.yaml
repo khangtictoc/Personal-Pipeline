@@ -62,19 +62,13 @@ jobs:
       run: |
         diff -u -b saved_followers.txt crt_followers.txt  | grep '^+' | sed 's/^+//' > new_followed.txt
         diff -u -b saved_followers.txt crt_followers.txt  | grep '^-' | sed 's/^-//' > new_unfollowed.txt
+        tail -n +2 new_followed.txt
+        tail -n +2 new_unfollowed.txt
         echo "NEW FOLLOWED USERS: "
         cat new_followed.txt
         echo "NEW UNFOLLOWED USERS: "
         cat new_unfollowed.txt
 
-    - name: Upload to S3 and sending Email if changes exists
-      run: |
-        if [ -s new_followed.txt ] || [ -s new_unfollowed.txt ]; then
-            aws s3 cp crt_followers.txt s3://github-management/follower-control/saved_followers.txt --force
-        else
-            echo "No new or abandon followers, no action performed."
-        fi
-    
     - name: Prepare for Email Templating
       run: |
         followers_list=""
@@ -90,12 +84,20 @@ jobs:
         sed -i "s|<ul id=\"new-followers\">|<ul id=\"new-followers\">$followers_list|" "$EMAIL_TEMPLATE_FILE"
         sed -i "s|<ul id=\"left-followers\">|<ul id=\"left-followers\">$unfollowers_list|" "$EMAIL_TEMPLATE_FILE"
         cat $EMAIL_TEMPLATE_FILE
-    - name: Send Email notification
-      run: |
-        HTML_BODY=$(cat $EMAIL_TEMPLATE_FILE)
 
-        aws ses send-email \
-          --from "tranhoangkhang09112001@gmail.com" \
-          --destination "ToAddresses=tranhoangkhang09112001@gmail.com" \
-          --message "Subject={Data=Follower Update on Github},Body={Html={Data='$HTML_BODY'}}" \
-          --region us-east-1
+    - name: Upload to S3 and sending Email if changes exists
+      run: |
+        if [ -s new_followed.txt ] || [ -s new_unfollowed.txt ]; then
+            HTML_BODY=$(cat $EMAIL_TEMPLATE_FILE)
+            aws ses send-email \
+              --from "tranhoangkhang09112001@gmail.com" \
+              --destination "ToAddresses=tranhoangkhang09112001@gmail.com" \
+              --message "Subject={Data=Follower Update on Github},Body={Html={Data='$HTML_BODY'}}" \
+              --region us-east-1
+            aws s3 cp crt_followers.txt s3://github-management/follower-control/saved_followers.txt --force
+        else
+            echo "No new or abandon followers, no action performed."
+        fi
+    
+    
+        
