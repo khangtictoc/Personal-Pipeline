@@ -74,4 +74,19 @@ jobs:
             echo "No new or abandon followers, no action performed."
         fi
 
-        
+    - name: Send Email notification
+      run: |
+        HTML_BODY="<html>
+        <body>
+          <h1>Hello,</h1>
+          <p>This is a multi-line email with HTML formatting.</p>
+          <p>It contains multiple lines and <strong>HTML tags</strong> for better styling.</p>
+          <p>Best Regards,<br>Your Company</p>
+        </body>
+        </html>"
+
+        aws ses send-email \
+          --from "tranhoangkhang09112001@gmail.com" \
+          --destination "tranhoangkhang09112001@gmail.com" \
+          --message "Subject={Data=Follower Update on Github},Body={Html={Data=$HTML_BODY}}" \
+          --region us-east-1
