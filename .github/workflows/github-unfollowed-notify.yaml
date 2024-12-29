@@ -76,13 +76,13 @@ jobs:
 
     - name: Send Email notification
       run: |
-        HTML_BODY="<html>
-        <body>
-          <h1>Hello,</h1>
-          <p>This is a multi-line email with HTML formatting.</p>
-          <p>It contains multiple lines and <strong>HTML tags</strong> for better styling.</p>
-          <p>Best Regards,<br>Your Company</p>
-        </body>
+        HTML_BODY="<html>\n
+        <body>\n
+          <h1>Hello,</h1>\n
+          <p>This is a multi-line email with HTML formatting.</p>\n
+          <p>It contains multiple lines and <strong>HTML tags</strong> for better styling.</p>\n
+          <p>Best Regards,<br>Your Company</p>\n
+        </body>\n
         </html>"
 
         aws ses send-email \
