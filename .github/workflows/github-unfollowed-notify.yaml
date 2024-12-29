@@ -42,7 +42,7 @@ jobs:
         aws configure set region $AWS_REGION
         aws configure set output $AWS_OUTPUT
 
-    - name: List all 
+    - name: List all followers of an authenticated user
       run: |
         curl -L \
         -H "Accept: application/vnd.github+json" \
@@ -62,8 +62,8 @@ jobs:
       run: |
         diff -u -b saved_followers.txt crt_followers.txt  | grep '^+' | sed 's/^+//' > new_followed.txt
         diff -u -b saved_followers.txt crt_followers.txt  | grep '^-' | sed 's/^-//' > new_unfollowed.txt
-        tail -n +2 new_followed.txt
-        tail -n +2 new_unfollowed.txt
+        tail -n +2 new_followed.txt > new_followed.txt
+        tail -n +2 new_unfollowed.txt > new_unfollowed.txt
         echo "NEW FOLLOWED USERS: "
         cat new_followed.txt
         echo "NEW UNFOLLOWED USERS: "
