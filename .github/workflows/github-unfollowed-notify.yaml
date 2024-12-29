@@ -88,5 +88,5 @@ jobs:
         aws ses send-email \
           --from "tranhoangkhang09112001@gmail.com" \
           --destination "ToAddresses=tranhoangkhang09112001@gmail.com" \
-          --message "Subject={Data=Follower Update on Github},Body={Html={Data=$HTML_BODY}}" \
+          --message "Subject={Data=Follower Update on Github},Body={Html={Data='<!DOCTYPE html><html><body><h1>Welcome to AWS SES</h1><p>This is an example email in HTML format.</p></body></html>'}}" \
           --region us-east-1
