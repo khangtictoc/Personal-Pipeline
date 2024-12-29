@@ -76,17 +76,19 @@ jobs:
 
     - name: Send Email notification
       run: |
-        HTML_BODY="<html>\n
-        <body>\n
-          <h1>Hello,</h1>\n
-          <p>This is a multi-line email with HTML formatting.</p>\n
-          <p>It contains multiple lines and <strong>HTML tags</strong> for better styling.</p>\n
-          <p>Best Regards,<br>Your Company</p>\n
-        </body>\n
-        </html>"
+        HTML_BODY=$(cat <<EOF
+        <!DOCTYPE html>
+        <html>
+        <body>
+        <h1>Welcome to AWS SES</h1>
+        <p>This is an example email in HTML format.</p>
+        </body>
+        </html>
+        EOF
+        )
 
         aws ses send-email \
           --from "tranhoangkhang09112001@gmail.com" \
           --destination "ToAddresses=tranhoangkhang09112001@gmail.com" \
-          --message "Subject={Data=Follower Update on Github},Body={Html={Data='<!DOCTYPE html><html><body><h1>Welcome to AWS SES</h1><p>This is an example email in HTML format.</p></body></html>'}}" \
+          --message "Subject={Data=Follower Update on Github},Body={Html={Data='$HTML_BODY'}}" \
           --region us-east-1
