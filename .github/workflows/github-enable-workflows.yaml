@@ -46,7 +46,7 @@ jobs:
       - name: Enable all workflows
         run: |
           echo "Enabling all workflows..."
-          for row in $(jq -c '.workflows[]' workflows.json); do
+          jq -c '.workflows[]' workflows.json | while read -r row; do
             ID=$(echo "$row" | jq -r '.id')
             NAME=$(echo "$row" | jq -r '.name')
             echo "Enabling: $NAME (ID: $ID)"
