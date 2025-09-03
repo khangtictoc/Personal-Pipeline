@@ -6,7 +6,7 @@ on:
       - main
   
   schedule:
-    # Runs every minutes
+    # Runs at 7:00 AM every day
     - cron: '0 7 * * *'
 
   # Optional: You can also allow manual runs
