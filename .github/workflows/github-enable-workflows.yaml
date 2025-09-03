@@ -1,15 +1,6 @@
 name: "[Github] Re-Activate All Disabled Workflow Current Repo"
 
 on:
-  # Optional: You can also allow manual runs
-  workflow_dispatch:
-    inputs:
-      name:
-        type: choice
-        description: Who to greet
-        options:
-          - monalisa
-          - cschleiden
   push:
     branches:
       - main
@@ -17,6 +8,9 @@ on:
   schedule:
     # Runs at 07:00 AM in every month.
     - cron: "0 7 * */1 *"
+
+  # Optional: You can also allow manual runs
+  workflow_dispatch:
 
 jobs:
   reactivate-disabled-workflows:
@@ -26,19 +20,64 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: List All Workflows
+      - name: Install prerequesite packages
         run: |
-          curl -s -L \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.PAT_GITHUB }}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/khangtictoc/Productive-Pipeline/actions/workflows
+          sudo apt install -y jq
 
-      - name: Enable All Workflows
+      - name: Fetch all workflows
         run: |
+          echo "Fetching all workflows..."
           curl -s -L \
-            -X PUT \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.PAT_GITHUB }}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/OWNER/REPO/actions/workflows/WORKFLOW_ID/enable
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows \
+            > workflows.json
+
+          echo "Workflows fetched and saved to workflows.json"
+          cat workflows.json | jq '.workflows[] | {id, name, state}'
+
+      - name: Enable workflows
+        run: |
+          echo "Enabling workflows based on input condition..."
+
+          # Read input values
+          INPUT_NAME="${{ github.event.inputs.name }}"
+          SEARCH_TEXT="${{ github.event.inputs.search-text }}"
+
+          # Loop through workflows
+          for row in $(jq -c '.workflows[]' workflows.json); do
+            ID=$(echo "$row" | jq -r '.id')
+            NAME=$(echo "$row" | jq -r '.name')
+            STATE=$(echo "$row" | jq -r '.state')
+
+            # Skip if already active
+            if [ "$STATE" = "active" ]; then
+              echo "Skipping $NAME (already active)"
+              continue
+            fi
+
+            # Filtering logic
+            if [ "$INPUT_NAME" = "ALL" ]; then
+              ENABLE=true
+            elif [ "$INPUT_NAME" = "SUBSET" ] && [[ "$NAME" == *"$SEARCH_TEXT"* ]]; then
+              ENABLE=true
+            elif [ "$INPUT_NAME" = "EXACT" ] && [ "$NAME" = "$SEARCH_TEXT" ]; then
+              ENABLE=true
+            else
+              ENABLE=false
+            fi
+
+            # Enable workflow if matched
+            if [ "$ENABLE" = true ]; then
+              echo "Enabling workflow: $NAME (ID: $ID)"
+              curl -s -L \
+                -X PUT \
+                -H "Accept: application/vnd.github+json" \
+                -H "Authorization: Bearer ${{ secrets.PAT_GITHUB }}" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                https://api.github.com/repos/${{ github.repository }}/actions/workflows/$ID/enable
+            else
+              echo "Skipping workflow: $NAME (does not match criteria)"
+            fi
+          done
