@@ -37,6 +37,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install Terraform
+        run: |
+          wget https://releases.hashicorp.com/terraform/1.10.3/terraform_1.10.3_linux_amd64.zip
+          unzip terraform_1.10.3_linux_amd64.zip
+          sudo mv terraform /usr/local/bin/terraform
+          echo "==== CLEAN UP ===="
+          rm -f terraform_1.10.3_linux_amd64.zip
+
       - name: Install prerequesite packages
         run: |
           wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.71.2-alpha2024122002/terragrunt_linux_amd64
