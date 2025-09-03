@@ -34,6 +34,12 @@ jobs:
             https://api.github.com/repos/${{ github.repository }}/actions/workflows \
             > workflows.json
 
+          if [ ! -s workflows.json ]; then
+            echo "Error: workflows.json is empty. API call failed."
+            cat workflows.json
+            exit 1
+          fi
+
           echo "Workflows fetched:"
           cat workflows.json | jq '.workflows[] | {id, name, state}'
 
