@@ -46,6 +46,8 @@ jobs:
       - name: Check Out Terragrunt Project
         run: |
           git clone --depth 1 https://github.com/khangtictoc/Terragrunt_Project_Structure_Design.git
+          pwd
+          ls -al
 
       - name: Terragrunt Plan
         run: |
