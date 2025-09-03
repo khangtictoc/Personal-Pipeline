@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  pre-installation:
+  reactivate-disabled-workflows:
     runs-on: ubuntu-latest
 
     steps:

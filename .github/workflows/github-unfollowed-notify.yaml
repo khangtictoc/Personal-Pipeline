@@ -18,7 +18,7 @@ env:
   EMAIL_TEMPLATE_FILE: samples/mail_template.html
 
 jobs:
-  pre-installation:
+  check-follow-status:
     runs-on: ubuntu-latest
     
     steps:
@@ -62,9 +62,9 @@ jobs:
       run: |
         diff -u -b saved_followers.txt crt_followers.txt  | grep '^+' | sed 's/^+//' > new_followed.txt
         diff -u -b saved_followers.txt crt_followers.txt  | grep '^-' | sed 's/^-//' > new_unfollowed.txt
-        echo "NEW FOLLOWED USERS: "
+        echo "####### NEW FOLLOWED USERS "#######"
         cat new_followed.txt
-        echo "NEW UNFOLLOWED USERS: "
+        echo "####### NEW UNFOLLOWED USERS #######"
         cat new_unfollowed.txt
 
     - name: Prepare for Email Templating
@@ -94,7 +94,9 @@ jobs:
               --region us-east-1
             aws s3 cp crt_followers.txt s3://github-management/follower-control/saved_followers.txt --force
         else
-            echo "No new or abandon followers, no action performed."
+            echo "+-----------------------------------------------+"
+            echo "No NEW or LEAVE followers, no action performed."
+            echo "+-----------------------------------------------+"
         fi
     
     
