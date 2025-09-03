@@ -6,8 +6,8 @@ on:
       - main
 
   schedule:
-    # Runs every day
-    - cron: "* * * * *"
+    # Runs at 07:00 AM in every month.
+    - cron: "0 7 * */1 *"
 
   # Optional: You can also allow manual runs
   workflow_dispatch:
