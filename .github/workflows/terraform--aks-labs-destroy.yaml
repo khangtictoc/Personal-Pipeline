@@ -1,0 +1,53 @@
+name: "[Terraform] Spin up Kubernetes Lab for Azure/AWS"
+
+on:
+  push:
+    branches:
+      - main
+
+  schedule:
+    # Runs at 07:00 AM in every month.
+    - cron: "0 0 */1 * *"
+
+  # Optional: You can also allow manual runs
+  workflow_dispatch:
+    inputs:
+      cloud_provider:
+        description: "Choose cloud platform for AKS/EKS"
+        required: true
+        default: "azure"
+        type: choice
+        options:
+          - azure
+          - aws
+
+env:
+  ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+  ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+  ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+jobs:
+  reactivate-disabled-workflows:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install prerequesite packages
+        run: |
+          wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.71.2-alpha2024122002/terragrunt_linux_amd64
+          sudo chmod u+x terragrunt_linux_amd64
+          sudo mv terragrunt_linux_amd64 /usr/local/bin/terragrunt
+
+      - name: Check Out Terragrunt Project
+        run: |
+          git clone --depth 1 https://github.com/khangtictoc/Terragrunt_Project_Structure_Design.git
+
+      - name: Terragrunt Plan
+        run: |
+          cd "Terragrunt_Project_Structure_Design/environment/dev/azure/Korea\ South/aks"
+          terragrunt plan
