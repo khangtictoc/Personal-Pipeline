@@ -1,4 +1,4 @@
-name: Github Workflow Re-Activate
+name: "[Github] Re-Activate All Disabled Workflow Current Repo"
 
 on:
   push:
@@ -24,7 +24,7 @@ jobs:
         run: |
           sudo apt install -y jq
 
-      - name: Install AWS CLI
+      - name: Reactivate Disabled Workflows
         run: |
           curl -L \
             -H "Accept: application/vnd.github+json" \
