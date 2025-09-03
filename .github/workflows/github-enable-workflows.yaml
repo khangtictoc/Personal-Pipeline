@@ -1,6 +1,15 @@
 name: "[Github] Re-Activate All Disabled Workflow Current Repo"
 
 on:
+  # Optional: You can also allow manual runs
+  workflow_dispatch:
+    inputs:
+      name:
+        type: choice
+        description: Who to greet
+        options:
+          - monalisa
+          - cschleiden
   push:
     branches:
       - main
@@ -8,9 +17,6 @@ on:
   schedule:
     # Runs at 07:00 AM in every month.
     - cron: "0 7 * */1 *"
-
-  # Optional: You can also allow manual runs
-  workflow_dispatch:
 
 jobs:
   reactivate-disabled-workflows:
@@ -20,14 +26,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install prerequesite packages
+      - name: List All Workflows
         run: |
-          sudo apt install -y jq
-
-      - name: Reactivate Disabled Workflows
-        run: |
-          curl -L \
+          curl -s -L \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ secrets.PAT_GITHUB }}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             https://api.github.com/repos/khangtictoc/Productive-Pipeline/actions/workflows
+
+      - name: Enable All Workflows
+        run: |
+          curl -s -L \
+            -X PUT \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.PAT_GITHUB }}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/OWNER/REPO/actions/workflows/WORKFLOW_ID/enable
