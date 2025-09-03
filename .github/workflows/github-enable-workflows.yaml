@@ -11,6 +11,18 @@ on:
 
   # Optional: You can also allow manual runs
   workflow_dispatch:
+    inputs:
+      name:
+        type: choice
+        description: Enable ALL/SET/EXACT of Workflows
+        options:
+          - ALL
+          - SUBSET
+          - EXACT
+      search-text:
+        description: 'Workflow name: ALL -> Ignore, SET -> Partial Match, EXACT -> Exact Match'
+        required: false
+        type: string
 
 jobs:
   reactivate-disabled-workflows:
