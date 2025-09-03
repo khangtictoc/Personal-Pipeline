@@ -11,18 +11,6 @@ on:
 
   # Optional: You can also allow manual runs
   workflow_dispatch:
-    inputs:
-      name:
-        type: choice
-        description: Enable ALL/SET/EXACT of Workflows
-        options:
-          - ALL
-          - SUBSET
-          - EXACT
-      search-text:
-        description: 'Workflow name: ALL -> Ignore, SET -> Partial Match, EXACT -> Exact Match'
-        required: false
-        type: string
 
 jobs:
   reactivate-disabled-workflows:
@@ -46,50 +34,20 @@ jobs:
             https://api.github.com/repos/${{ github.repository }}/actions/workflows \
             > workflows.json
 
-          echo "Workflows fetched and saved to workflows.json"
+          echo "Workflows fetched:"
           cat workflows.json | jq '.workflows[] | {id, name, state}'
 
-      - name: Enable workflows
+      - name: Enable all workflows
         run: |
-          echo "Enabling workflows based on input condition..."
-
-          # Read input values
-          INPUT_NAME="${{ github.event.inputs.name }}"
-          SEARCH_TEXT="${{ github.event.inputs.search-text }}"
-
-          # Loop through workflows
+          echo "Enabling all workflows..."
           for row in $(jq -c '.workflows[]' workflows.json); do
             ID=$(echo "$row" | jq -r '.id')
             NAME=$(echo "$row" | jq -r '.name')
-            STATE=$(echo "$row" | jq -r '.state')
-
-            # Skip if already active
-            if [ "$STATE" = "active" ]; then
-              echo "Skipping $NAME (already active)"
-              continue
-            fi
-
-            # Filtering logic
-            if [ "$INPUT_NAME" = "ALL" ]; then
-              ENABLE=true
-            elif [ "$INPUT_NAME" = "SUBSET" ] && [[ "$NAME" == *"$SEARCH_TEXT"* ]]; then
-              ENABLE=true
-            elif [ "$INPUT_NAME" = "EXACT" ] && [ "$NAME" = "$SEARCH_TEXT" ]; then
-              ENABLE=true
-            else
-              ENABLE=false
-            fi
-
-            # Enable workflow if matched
-            if [ "$ENABLE" = true ]; then
-              echo "Enabling workflow: $NAME (ID: $ID)"
-              curl -s -L \
-                -X PUT \
-                -H "Accept: application/vnd.github+json" \
-                -H "Authorization: Bearer ${{ secrets.PAT_GITHUB }}" \
-                -H "X-GitHub-Api-Version: 2022-11-28" \
-                https://api.github.com/repos/${{ github.repository }}/actions/workflows/$ID/enable
-            else
-              echo "Skipping workflow: $NAME (does not match criteria)"
-            fi
+            echo "Enabling: $NAME (ID: $ID)"
+            curl -s -L \
+              -X PUT \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${{ secrets.PAT_GITHUB }}" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              https://api.github.com/repos/${{ github.repository }}/actions/workflows/$ID/enable
           done
