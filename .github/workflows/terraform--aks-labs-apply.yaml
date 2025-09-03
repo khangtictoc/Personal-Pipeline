@@ -46,8 +46,10 @@ jobs:
       - name: Check Out Terragrunt Project
         run: |
           git clone --depth 1 https://github.com/khangtictoc/Terragrunt_Project_Structure_Design.git
+          echo $kdjfkldjf
+          echo $ARM_CLIENT_ID
           pwd
-          ls -al Terragrunt_Project_Structure_Design/environment/dev/azure
+          ls -al Terragrunt_Project_Structure_Design/environment/dev/azure/Korea\ South/aks
 
       - name: Terragrunt Plan
         run: |
