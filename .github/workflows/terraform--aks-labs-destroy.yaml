@@ -47,7 +47,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/khangtictoc/Terragrunt_Project_Structure_Design.git
 
-      - name: Terragrunt Plan
+      - name: Terragrunt Destroy
         run: |
           cd "Terragrunt_Project_Structure_Design/environment/dev/azure/Korea South/aks"
-          terragrunt plan
+          terragrunt destroy -auto-approve
