@@ -37,6 +37,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install AWS CLI
+        run: |
+          if ! command -v aws 2>&1 >/dev/null
+          then
+              echo "- [NOTIFY 🔔] aws command could not be found. Please install it first."
+              curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+              unzip awscliv2.zip
+              sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update
+          else
+              echo "- [CHECKED ✅] aws exists"
+          fi
+
+      - name: Install Terraform
+        run: |
+          wget https://releases.hashicorp.com/terraform/1.10.3/terraform_1.10.3_linux_amd64.zip
+          unzip terraform_1.10.3_linux_amd64.zip
+          sudo mv terraform /usr/local/bin/terraform
+          echo "==== CLEAN UP ===="
+          rm -f terraform_1.10.3_linux_amd64.zip
+
       - name: Install prerequesite packages
         run: |
           wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.71.2-alpha2024122002/terragrunt_linux_amd64
