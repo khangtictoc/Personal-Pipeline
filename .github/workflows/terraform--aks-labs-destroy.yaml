@@ -1,4 +1,4 @@
-name: "[Terraform] Spin up Kubernetes Lab for Azure/AWS"
+name: "[Terraform] Destroy Kubernetes Lab for Azure/AWS"
 
 on:
   # push:
