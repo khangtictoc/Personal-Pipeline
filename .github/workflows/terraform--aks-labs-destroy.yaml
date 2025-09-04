@@ -1,13 +1,13 @@
 name: "[Terraform] Spin up Kubernetes Lab for Azure/AWS"
 
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
 
-  schedule:
-    # Runs at 07:00 AM in every month.
-    - cron: "0 0 */1 * *"
+  # schedule:
+  #   # Runs at 07:00 AM in every month.
+  #   - cron: "0 23 */1 * *"
 
   # Optional: You can also allow manual runs
   workflow_dispatch:

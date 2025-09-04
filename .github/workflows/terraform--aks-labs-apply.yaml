@@ -5,9 +5,9 @@ on:
   #   branches:
   #     - main
 
-  schedule:
-    # Runs at 07:00 AM in every month.
-    - cron: "0 17 */1 * *"
+  # schedule:
+  #   # Runs at 07:00 AM in every month.
+  #   - cron: "0 17 */1 * *"
 
   # Optional: You can also allow manual runs
   workflow_dispatch:
