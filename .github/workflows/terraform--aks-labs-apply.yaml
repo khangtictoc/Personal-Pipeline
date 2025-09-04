@@ -30,7 +30,7 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
 jobs:
-  reactivate-disabled-workflows:
+  kubernetes-cloud-deploy:
     runs-on: ubuntu-latest
 
     steps:
