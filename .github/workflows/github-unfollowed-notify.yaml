@@ -1,9 +1,9 @@
 name: "[Github] Unfollowed Nofifier"
 
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
   
   schedule:
     # Runs at 7:00 AM every day
