@@ -49,5 +49,5 @@ jobs:
 
       - name: Terragrunt Plan
         run: |
-          cd "Terragrunt_Project_Structure_Design/environment/dev/azure/Korea\ South/aks"
+          cd "Terragrunt_Project_Structure_Design/environment/dev/azure/Korea South/aks"
           terragrunt plan
