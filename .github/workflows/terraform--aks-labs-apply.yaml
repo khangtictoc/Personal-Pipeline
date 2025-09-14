@@ -35,6 +35,16 @@ on:
           - Korea South
           - East US
 
+      environment:
+        description: "Choose environment"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - prod
+          - stg
+
 env:
   ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
   ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
@@ -85,10 +95,10 @@ jobs:
 
       - name: Terragrunt Plan
         run: |
-          cd "Terragrunt_Project_Structure_Design/environment/dev/${{ github.event.inputs.cloud_provider }}/${{ github.event.inputs.prefixLength }}/aks"
+          cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/${{ github.event.inputs.region }}/aks"
           terragrunt plan
 
       - name: Terragrunt Apply (Auto Approve)
         run: |
-          cd "Terragrunt_Project_Structure_Design/environment/dev/${{ github.event.inputs.cloud_provider }}/${{ github.event.inputs.prefixLength }}/aks"
+          cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/${{ github.event.inputs.region }}/aks"
           terragrunt apply --auto-approve
