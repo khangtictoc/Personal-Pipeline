@@ -37,6 +37,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Verify Secret
+        run: |
+          echo "ARM_TENANT_ID: ${ARM_TENANT_ID:0:4}****"
+          echo "ARM_SUBSCRIPTION_ID: ${ARM_SUBSCRIPTION_ID:0:4}****"
+          echo "ARM_CLIENT_ID: ${ARM_CLIENT_ID:0:4}****"
+          echo "ARM_CLIENT_SECRET: ${ARM_CLIENT_SECRET:0:4}****"
+          echo "AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:0:4}****"
+          echo "AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:0:4}****"
+
       - name: Install AWS CLI
         run: |
           if ! command -v aws 2>&1 >/dev/null
