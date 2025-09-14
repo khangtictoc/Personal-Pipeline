@@ -20,6 +20,20 @@ on:
         options:
           - azure
           - aws
+      region:
+        description: "Choose region for AKS/EKS"
+        required: true
+        default: "eastus"
+        type: choice
+        options:
+          - eastus
+          - westus
+          - centralus
+          - northeurope
+          - westeurope
+          - Japan East
+          - Korea South
+          - East US
 
 env:
   ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
@@ -71,10 +85,10 @@ jobs:
 
       - name: Terragrunt Plan
         run: |
-          cd "Terragrunt_Project_Structure_Design/environment/dev/azure/Korea South/aks"
+          cd "Terragrunt_Project_Structure_Design/environment/dev/${{ github.event.inputs.cloud_provider }}/${{ github.event.inputs.prefixLength }}/aks"
           terragrunt plan
 
       - name: Terragrunt Apply (Auto Approve)
         run: |
-          cd "Terragrunt_Project_Structure_Design/environment/dev/azure/Korea South/aks"
+          cd "Terragrunt_Project_Structure_Design/environment/dev/${{ github.event.inputs.cloud_provider }}/${{ github.event.inputs.prefixLength }}/aks"
           terragrunt apply --auto-approve
