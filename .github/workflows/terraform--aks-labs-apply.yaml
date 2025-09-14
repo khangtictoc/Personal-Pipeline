@@ -34,7 +34,6 @@ on:
           - Japan East
           - Korea South
           - East US
-
       environment:
         description: "Choose environment"
         required: true
@@ -78,16 +77,9 @@ jobs:
         run: |
           curl -sS https://raw.githubusercontent.com/khangtictoc/Productive-Workspace-Set-Up/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/terraform.sh | sh
 
-      - name: Install prerequesite packages
+      - name: Install Terragrunt CLI
         run: |
-          if ! command -v terragrunt 2>&1 >/dev/null
-            then
-              wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.71.2-alpha2024122002/terragrunt_linux_amd64
-              sudo chmod u+x terragrunt_linux_amd64
-              sudo mv terragrunt_linux_amd64 /usr/local/bin/terragrunt
-          else
-              echo "- [CHECKED ✅] terragrunt command exists"
-          fi
+          curl -sS https://raw.githubusercontent.com/khangtictoc/Productive-Workspace-Set-Up/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/terragrunt.sh | sh
 
       - name: Check Out Terragrunt Project
         run: |

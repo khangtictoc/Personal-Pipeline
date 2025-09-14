@@ -20,6 +20,29 @@ on:
         options:
           - azure
           - aws
+      region:
+        description: "Choose region for AKS/EKS"
+        required: true
+        default: "eastus"
+        type: choice
+        options:
+          - eastus
+          - westus
+          - centralus
+          - northeurope
+          - westeurope
+          - Japan East
+          - Korea South
+          - East US
+      environment:
+        description: "Choose environment"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - prod
+          - stg
 
 env:
   ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
@@ -48,35 +71,20 @@ jobs:
 
       - name: Install AWS CLI
         run: |
-          if ! command -v aws 2>&1 >/dev/null
-          then
-              echo "- [NOTIFY 🔔] aws command could not be found. Please install it first."
-              curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-              unzip awscliv2.zip
-              sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update
-          else
-              echo "- [CHECKED ✅] aws exists"
-          fi
+          curl -sS https://raw.githubusercontent.com/khangtictoc/Productive-Workspace-Set-Up/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/aws_cli.sh | sh
 
       - name: Install Terraform
         run: |
-          wget https://releases.hashicorp.com/terraform/1.10.3/terraform_1.10.3_linux_amd64.zip
-          unzip terraform_1.10.3_linux_amd64.zip
-          sudo mv terraform /usr/local/bin/terraform
-          echo "==== CLEAN UP ===="
-          rm -f terraform_1.10.3_linux_amd64.zip
+          curl -sS https://raw.githubusercontent.com/khangtictoc/Productive-Workspace-Set-Up/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/terraform.sh | sh
 
-      - name: Install prerequesite packages
+      - name: Install Terragrunt CLI
         run: |
-          wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.71.2-alpha2024122002/terragrunt_linux_amd64
-          sudo chmod u+x terragrunt_linux_amd64
-          sudo mv terragrunt_linux_amd64 /usr/local/bin/terragrunt
-
+          curl -sS https://raw.githubusercontent.com/khangtictoc/Productive-Workspace-Set-Up/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/terragrunt.sh | sh
       - name: Check Out Terragrunt Project
         run: |
           git clone --depth 1 https://github.com/khangtictoc/Terragrunt_Project_Structure_Design.git
 
       - name: Terragrunt Destroy
         run: |
-          cd "Terragrunt_Project_Structure_Design/environment/dev/azure/Korea South/aks"
+          cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/${{ github.event.inputs.region }}/aks"
           terragrunt destroy -auto-approve
