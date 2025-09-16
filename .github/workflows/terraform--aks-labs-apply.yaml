@@ -20,20 +20,25 @@ on:
         options:
           - azure
           - aws
-      region:
-        description: "Choose region for AKS/EKS"
+      region_aws:
+        description: "Choose region for EKS"
         required: true
         default: "eastus"
         type: choice
         options:
-          - eastus
-          - westus
-          - centralus
-          - northeurope
-          - westeurope
-          - Japan East
-          - Korea South
+          - us-east-1
+          - us-west-2
+          - ap-east-1
+      
+      region_azure:
+        description: "Choose region for AKS"
+        required: true
+        default: "Japan East"
+        type: choice
+        options:
           - East US
+          - West US 2
+          - Japan East
       environment:
         description: "Choose environment"
         required: true
@@ -43,6 +48,17 @@ on:
           - dev
           - prod
           - stg
+      terraform_action:
+        description: "Choose Terraform action"
+        required: true
+        default: "apply"
+        type: choice
+        options:
+          - plan
+          - apply
+          - plan & apply 
+          - destroy
+
 
 env:
   ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
@@ -86,11 +102,19 @@ jobs:
           git clone --depth 1 https://github.com/khangtictoc/Terragrunt_Project_Structure_Design.git
 
       - name: Terragrunt Plan
+        if: contains(github.event.inputs.terraform_action, 'plan')
         run: |
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/${{ github.event.inputs.region }}/aks"
           terragrunt plan
 
       - name: Terragrunt Apply (Auto Approve)
+        if: contains(github.event.inputs.terraform_action, 'apply')
         run: |
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/${{ github.event.inputs.region }}/aks"
           terragrunt apply --auto-approve
+
+      - name: Terragrunt Destroy (Auto Approve)
+        if: contains(github.event.inputs.terraform_action, 'destroy')
+        run: |
+          cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/${{ github.event.inputs.region }}/aks"
+          terragrunt destroy --auto-approve
