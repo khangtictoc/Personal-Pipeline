@@ -57,6 +57,7 @@ on:
           - plan
           - apply
           - plan & apply
+          - plan --destroy
           - destroy
 
 env:
@@ -136,7 +137,17 @@ jobs:
         if: contains(github.event.inputs.terraform_action, 'destroy')
         run: |
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION/aks"
-          terragrunt run-all plan --non-interactive \
+          terragrunt run-all destroy --non-interactive \
+            --queue-include-external \
+            --working-dir . \
+            --queue-include-dir aks \
+            --queue-include-dir naming
+
+      - name: Terragrunt Destroy (Auto Approve)
+        if: github.event.inputs.terraform_action == 'plan --destroy'
+        run: |
+          cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION/aks"
+          terragrunt run-all plan --destroy --non-interactive \
             --queue-include-external \
             --working-dir . \
             --queue-include-dir aks \
