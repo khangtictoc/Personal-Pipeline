@@ -134,7 +134,7 @@ jobs:
             --queue-include-dir naming
 
       - name: Terragrunt Destroy (Auto Approve)
-        if: contains(github.event.inputs.terraform_action, 'destroy')
+        if: github.event.inputs.terraform_action == 'destroy'
         run: |
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION"
           terragrunt run-all destroy --non-interactive \
@@ -143,7 +143,7 @@ jobs:
             --queue-include-dir aks \
             --queue-include-dir naming
 
-      - name: Terragrunt Destroy (Auto Approve)
+      - name: Terragrunt Plan Destroy
         if: github.event.inputs.terraform_action == 'plan --destroy'
         run: |
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION"
