@@ -121,6 +121,7 @@ jobs:
             --queue-include-external \
             --working-dir . \
             --queue-include-dir aks \
+            --queue-include-dir appgw \
             --queue-include-dir naming
 
       - name: Terragrunt Apply (Auto Approve)
@@ -131,6 +132,7 @@ jobs:
             --queue-include-external \
             --working-dir . \
             --queue-include-dir aks \
+            --queue-include-dir appgw \
             --queue-include-dir naming
 
       - name: Terragrunt Destroy (Auto Approve)
@@ -141,6 +143,7 @@ jobs:
             --queue-include-external \
             --working-dir . \
             --queue-include-dir aks \
+            --queue-include-dir appgw \
             --queue-include-dir naming
 
       - name: Terragrunt Plan Destroy
@@ -151,4 +154,5 @@ jobs:
             --queue-include-external \
             --working-dir . \
             --queue-include-dir aks \
+            --queue-include-dir appgw \
             --queue-include-dir naming
