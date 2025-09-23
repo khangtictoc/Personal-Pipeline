@@ -101,6 +101,9 @@ jobs:
         run: |
           curl -sS https://raw.githubusercontent.com/khangtictoc/ArgoCD-Apps/refs/heads/main/helm/argocd/install.sh | sh
 
+      - name: "Install Pre-requisite"
+        run: |
+          curl -sS https://raw.githubusercontent.com/khangtictoc/ArgoCD-Apps/refs/heads/main/script/create_namespace.sh | sh
       - name: "[K8S] Install NGINX Ingress Controller"
         working-directory: ./oss/argocd_apps/nginx
         run: |
