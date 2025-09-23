@@ -1,4 +1,4 @@
-name: "[Terraform] Spin up Kubernetes Lab for Azure/AWS"
+name: "[K8s] OSS Installation"
 
 on:
   # push:
@@ -88,6 +88,10 @@ jobs:
       - name: Install Kubectl
         run: |
           curl -sS https://raw.githubusercontent.com/khangtictoc/Productive-Workspace-Set-Up/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/kubectl.sh | sh
+
+      - name: Set up Cluster Access Credentials
+        run: |
+          aws s3 cp "s3://terragrunt-output/dev/azure/Japan East/kubeconfig" ~/.kube/config
 
       - name: "[K8S] Install ArgoCD"
         run: |
