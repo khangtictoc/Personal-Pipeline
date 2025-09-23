@@ -93,14 +93,20 @@ jobs:
         run: |
           aws s3 cp "s3://terragrunt-output/dev/azure/Japan East/kubeconfig" ~/.kube/config
 
+      - name: Clone OSS Repository
+        run: |
+          git clone https://github.com/khangtictoc/ArgoCD-Apps.git "argocd-apps"
+
       - name: "[K8S] Install ArgoCD"
         run: |
           curl -sS https://raw.githubusercontent.com/khangtictoc/ArgoCD-Apps/refs/heads/main/helm/argocd/install.sh | sh
 
-      - name: "[K8S] Install Nginx Ingress Controller"
+      - name: "[K8S] Install NGINX Ingress Controller"
+        working-directory: ./oss/argocd_apps/nginx
         run: |
-          curl -sS https://github.com/khangtictoc/ArgoCD-Apps/blob/main/argocd_apps/nginx/applications.yaml | kubectl apply -f -
+          kubectl apply -f applications.yaml
 
-      - name: "[K8S] Install Jenkins"
+      - name: "[K8S] Install JENKINS"
+        working-directory: ./oss/argocd_apps/jenkins
         run: |
-          curl -sS https://github.com/khangtictoc/ArgoCD-Apps/blob/main/argocd_apps/jenkins/applications.yaml | kubectl apply -f -
+          kubectl apply -f applications.yaml
