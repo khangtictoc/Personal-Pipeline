@@ -95,7 +95,7 @@ jobs:
 
       - name: Clone OSS Repository
         run: |
-          git clone https://github.com/khangtictoc/ArgoCD-Apps.git "argocd-apps"
+          git clone https://github.com/khangtictoc/ArgoCD-Apps.git "OSS"
 
       - name: "[K8S] Install ArgoCD"
         run: |
@@ -105,11 +105,11 @@ jobs:
         run: |
           curl -sS https://raw.githubusercontent.com/khangtictoc/ArgoCD-Apps/refs/heads/main/script/create_namespace.sh | sh
       - name: "[K8S] Install NGINX Ingress Controller"
-        working-directory: ./oss/argocd_apps/nginx
+        working-directory: ./OSS/argocd_apps/nginx
         run: |
           kubectl apply -f applications.yaml
 
       - name: "[K8S] Install JENKINS"
-        working-directory: ./oss/argocd_apps/jenkins
+        working-directory: ./OSS/argocd_apps/jenkins
         run: |
           kubectl apply -f applications.yaml
