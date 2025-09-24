@@ -64,8 +64,9 @@ jobs:
           curl -sS https://raw.githubusercontent.com/khangtictoc/Productive-Workspace-Set-Up/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/argocd_cli.sh | sh
 
       - name: "[K8S] Install ArgoCD"
+        working-directory: OSS/helm/argocd
         run: |
-          curl -sS https://raw.githubusercontent.com/khangtictoc/ArgoCD-Apps/refs/heads/main/helm/argocd/install.sh | sh
+          ./install.sh
 
       - name: "Install Pre-requisite"
         run: |
