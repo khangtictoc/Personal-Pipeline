@@ -66,6 +66,7 @@ jobs:
       - name: "[K8S] Install ArgoCD"
         working-directory: OSS/helm/argocd
         run: |
+          chmod +x install.sh
           ./install.sh
 
       - name: "Install Pre-requisite"
