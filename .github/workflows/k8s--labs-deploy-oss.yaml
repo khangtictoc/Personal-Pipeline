@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
     inputs:
       kubectl_action:
-        description: "Choose Terraform action"
+        description: "Choose Kubectl action"
         required: true
         default: "apply"
         type: choice
@@ -80,7 +80,7 @@ jobs:
           kubectl apply -f applications.yaml
 
       - name: "[K8S] [DRY-RUN] Install NGINX Ingress Controller"
-        if: contains(github.event.inputs.kubectl_action, 'apply')
+        if: contains(github.event.inputs.kubectl_action, 'dry_run')
         working-directory: OSS/argocd_apps/nginx
         run: |
           kubectl apply -f applications.yaml --dry-run
@@ -92,7 +92,7 @@ jobs:
           kubectl apply -f applications.yaml
 
       - name: "[K8S] [DRY-RUN] Install JENKINS"
-        if: contains(github.event.inputs.kubectl_action, 'apply')
+        if: contains(github.event.inputs.kubectl_action, 'dry_run')
         working-directory: OSS/argocd_apps/jenkins
         run: |
           kubectl apply -f applications.yaml --dry-run
