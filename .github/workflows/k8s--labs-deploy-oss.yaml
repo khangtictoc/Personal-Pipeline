@@ -97,14 +97,13 @@ jobs:
         run: |
           git clone https://github.com/khangtictoc/ArgoCD-Apps.git "OSS"
 
-      - name: Debug
-        run: |
-          ls -al
-          pwd
-
       - name: "[K8S] Install ArgoCD"
         run: |
           curl -sS https://raw.githubusercontent.com/khangtictoc/ArgoCD-Apps/refs/heads/main/helm/argocd/install.sh | sh
+      
+      - name: "[CLI] Install ArgoCD"
+        run: |
+          curl -sS https://raw.githubusercontent.com/khangtictoc/ArgoCD-Apps/refs/heads/main/helm/argocd/argocd_cli.sh | sh
 
       - name: "Install Pre-requisite"
         run: |
