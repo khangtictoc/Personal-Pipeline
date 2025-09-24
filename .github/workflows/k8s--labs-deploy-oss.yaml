@@ -69,6 +69,11 @@ jobs:
           chmod +x install.sh
           ./install.sh
 
+      - name: "[K8S] Configure 'default' Argo Project"
+        working-directory: OSS/helm/argocd
+        run: |
+          kubectl apply -f manifest/default.appproject.yaml
+
       - name: "Install Pre-requisite"
         run: |
           curl -sS https://raw.githubusercontent.com/khangtictoc/ArgoCD-Apps/refs/heads/main/script/create_namespace.sh | sh
@@ -84,6 +89,12 @@ jobs:
         working-directory: OSS/argocd_apps/nginx
         run: |
           kubectl apply -f applications.yaml --dry-run
+          sleep 5
+
+      - name: "[K8S] Install Ingress from AppGW to Nginx"
+        working-directory: OSS/argocd_apps/nginx
+        run: |
+          kubectl apply -f ingress-appgw-to-nginx.yaml
 
       - name: "[K8S] [APPLY] Install JENKINS"
         if: contains(github.event.inputs.kubectl_action, 'apply')
