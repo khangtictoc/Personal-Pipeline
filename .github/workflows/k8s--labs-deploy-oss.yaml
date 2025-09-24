@@ -12,53 +12,15 @@ on:
   # Optional: You can also allow manual runs
   workflow_dispatch:
     inputs:
-      cloud_provider:
-        description: "Choose cloud platform for AKS/EKS"
-        required: true
-        default: "azure"
-        type: choice
-        options:
-          - azure
-          - aws
-      region_aws:
-        description: "Choose region for EKS"
-        required: true
-        default: "eastus"
-        type: choice
-        options:
-          - us-east-1
-          - us-west-2
-          - ap-east-1
-
-      region_azure:
-        description: "Choose region for AKS"
-        required: true
-        default: "Japan East"
-        type: choice
-        options:
-          - East US
-          - West US 2
-          - Japan East
-      environment:
-        description: "Choose environment"
-        required: true
-        default: "dev"
-        type: choice
-        options:
-          - dev
-          - prod
-          - stg
-      terraform_action:
+      kubectl_action:
         description: "Choose Terraform action"
         required: true
         default: "apply"
         type: choice
         options:
-          - plan
+          - dry_run
           - apply
-          - plan & apply
-          - plan --destroy
-          - destroy
+          - delete
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -100,20 +62,35 @@ jobs:
       - name: "[K8S] Install ArgoCD"
         run: |
           curl -sS https://raw.githubusercontent.com/khangtictoc/ArgoCD-Apps/refs/heads/main/helm/argocd/install.sh | sh
-      
+
       - name: "[CLI] Install ArgoCD"
         run: |
-          curl -sS https://raw.githubusercontent.com/khangtictoc/ArgoCD-Apps/refs/heads/main/helm/argocd/argocd_cli.sh | sh
+          curl -sS https://raw.githubusercontent.com/khangtictoc/Productive-Workspace-Set-Up/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/argocd_cli.sh | sh
 
       - name: "Install Pre-requisite"
         run: |
           curl -sS https://raw.githubusercontent.com/khangtictoc/ArgoCD-Apps/refs/heads/main/script/create_namespace.sh | sh
-      - name: "[K8S] Install NGINX Ingress Controller"
+
+      - name: "[K8S] [APPLY] Install NGINX Ingress Controller"
+        if: contains(github.event.inputs.kubectl_action, 'apply')
         working-directory: OSS/argocd_apps/nginx
         run: |
           kubectl apply -f applications.yaml
 
-      - name: "[K8S] Install JENKINS"
+      - name: "[K8S] [DRY-RUN] Install NGINX Ingress Controller"
+        if: contains(github.event.inputs.kubectl_action, 'apply')
+        working-directory: OSS/argocd_apps/nginx
+        run: |
+          kubectl apply -f applications.yaml --dry-run
+
+      - name: "[K8S] [APPLY] Install JENKINS"
+        if: contains(github.event.inputs.kubectl_action, 'apply')
         working-directory: OSS/argocd_apps/jenkins
         run: |
           kubectl apply -f applications.yaml
+
+      - name: "[K8S] [DRY-RUN] Install JENKINS"
+        if: contains(github.event.inputs.kubectl_action, 'apply')
+        working-directory: OSS/argocd_apps/jenkins
+        run: |
+          kubectl apply -f applications.yaml --dry-run
