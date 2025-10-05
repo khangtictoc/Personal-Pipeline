@@ -1,4 +1,4 @@
-name: "[Terraform] Spin up Kubernetes Lab for Azure/AWS"
+name: "[Terraform] Kubernetes Cloud Lab"
 
 on:
   # push:
@@ -20,6 +20,7 @@ on:
         options:
           - azure
           - aws
+          - gcp
       region_aws:
         description: "Choose region for EKS"
         required: true

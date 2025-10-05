@@ -1,4 +1,4 @@
-name: "[K8s] OSS Installation"
+name: "[Kubernetes] OSS Installation"
 
 on:
   # push:
@@ -118,5 +118,23 @@ jobs:
       - name: "[K8S] [DIFF] Install JENKINS"
         if: contains(github.event.inputs.kubectl_action, 'dry_run')
         working-directory: OSS/argocd_apps/jenkins
+        run: |
+          kubectl diff -f applications.yaml
+
+      - name: "[K8S] [APPLY] Install CERT-MANAGER"
+        if: contains(github.event.inputs.kubectl_action, 'apply')
+        working-directory: OSS/argocd_apps/cert-manager
+        run: |
+          kubectl apply -f applications.yaml
+
+      - name: "[K8S] [DRY-RUN] Install CERT-MANAGER"
+        if: contains(github.event.inputs.kubectl_action, 'dry_run')
+        working-directory: OSS/argocd_apps/cert-manager
+        run: |
+          kubectl apply -f applications.yaml --dry-run=server
+
+      - name: "[K8S] [DIFF] Install CERT-MANAGER"
+        if: contains(github.event.inputs.kubectl_action, 'dry_run')
+        working-directory: OSS/argocd_apps/cert-manager
         run: |
           kubectl diff -f applications.yaml
