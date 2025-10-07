@@ -1,4 +1,4 @@
-name: "[Kubernetes] OSS Installation"
+name: "Kubernetes - OSS Installation"
 
 on:
   # push:

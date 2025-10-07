@@ -1,4 +1,4 @@
-name: "[Terraform] Kubernetes Cloud Lab"
+name: "Terraform - Kubernetes Cloud Lab"
 
 on:
   # push:
