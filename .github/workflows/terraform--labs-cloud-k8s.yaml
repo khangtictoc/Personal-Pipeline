@@ -24,7 +24,7 @@ on:
       region_aws:
         description: "Choose region for EKS"
         required: true
-        default: "eastus"
+        default: "us-east-1"
         type: choice
         options:
           - us-east-1
@@ -94,7 +94,7 @@ jobs:
           echo "Environment: ${{ github.event.inputs.environment }}"
           echo "Terraform Action: ${{ github.event.inputs.terraform_action }}"
 
-  kubernetes-cloud-action:
+  cloud-k8s-deployment:
     runs-on: ubuntu-latest
 
     steps:

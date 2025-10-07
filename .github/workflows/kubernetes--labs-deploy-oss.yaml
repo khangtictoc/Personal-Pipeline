@@ -43,7 +43,7 @@ jobs:
         run: |
           echo "Verify input"
 
-  oss-k8s-install:
+  k8s-oss-install:
     runs-on: ubuntu-latest
 
     steps:
