@@ -21,6 +21,7 @@ on:
           - azure
           - aws
           - gcp
+          - hcp
       region_aws:
         description: "Choose region for EKS"
         required: true
@@ -40,6 +41,15 @@ on:
           - East US
           - West US 2
           - Japan East
+      region_hcp:
+        description: "Choose region for HCP"
+        required: true
+        default: "us-east-1"
+        type: choice
+        options:
+          - us-east-1
+          - us-west-2
+          - ap-east-1
       environment:
         description: "Choose environment"
         required: true
@@ -68,7 +78,7 @@ env:
   ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  REGION: ${{ github.event.inputs.cloud_provider == 'aws' && github.event.inputs.region_aws || github.event.inputs.region_azure }}
+  REGION: ${{ github.event.inputs.cloud_provider == 'aws' && github.event.inputs.region_aws || github.event.inputs.cloud_provider == 'azure' && github.event.inputs.region_azure || github.event.inputs.cloud_provider == 'hcp' && github.event.inputs.region_hcp }}
 
 jobs:
   verify-configuration:
@@ -143,9 +153,7 @@ jobs:
           terragrunt run-all destroy --non-interactive \
             --queue-include-external \
             --working-dir . \
-            --queue-include-dir aks \
-            --queue-include-dir appgw \
-            --queue-include-dir naming
+            --queue-include-dir vault-dedicated-cluster
 
       - name: Terragrunt Plan Destroy
         if: github.event.inputs.terraform_action == 'plan --destroy'
@@ -154,6 +162,4 @@ jobs:
           terragrunt run-all plan --destroy --non-interactive \
             --queue-include-external \
             --working-dir . \
-            --queue-include-dir aks \
-            --queue-include-dir appgw \
-            --queue-include-dir naming
+            --queue-include-dir vault-dedicated-cluster

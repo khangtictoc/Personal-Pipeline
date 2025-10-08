@@ -1,0 +1,24 @@
+name: Linting - Format All Codebases
+on:
+  workflow_dispatch:
+
+env:
+  OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.ONEPASSWORD_SERVICE_ACCOUNT_TOKEN }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  ONEPASSWORD_JENKINS_ITEM: "[Lab] Jenkins (local)"
+  ONEPASSWORD_ARGOCD_ITEM: "[Lab] ArgoCD (local)"
+  ONEPASSWORD_VAULT: "Temporary"
+
+jobs:
+  format-codebase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Verify Secret
+        run: |
+          echo "1PASSWORD_SERVICE_ACCOUNT_TOKEN: ${OP_SERVICE_ACCOUNT_TOKEN:0:4}****"
+          echo "AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:0:4}****"
+          echo "AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:0:4}****"
