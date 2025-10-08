@@ -130,10 +130,7 @@ jobs:
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION"
           terragrunt run-all plan --non-interactive \
             --queue-include-external \
-            --working-dir . \
-            --queue-include-dir aks \
-            --queue-include-dir appgw \
-            --queue-include-dir naming
+            --working-dir .
 
       - name: Terragrunt Apply (Auto Approve)
         if: contains(github.event.inputs.terraform_action, 'apply')
@@ -141,10 +138,7 @@ jobs:
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION"
           terragrunt run-all apply --non-interactive \
             --queue-include-external \
-            --working-dir . \
-            --queue-include-dir aks \
-            --queue-include-dir appgw \
-            --queue-include-dir naming
+            --working-dir .
 
       - name: Terragrunt Destroy (Auto Approve)
         if: github.event.inputs.terraform_action == 'destroy'
@@ -152,8 +146,7 @@ jobs:
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION"
           terragrunt run-all destroy --non-interactive \
             --queue-include-external \
-            --working-dir . \
-            --queue-include-dir vault-dedicated-cluster
+            --working-dir .
 
       - name: Terragrunt Plan Destroy
         if: github.event.inputs.terraform_action == 'plan --destroy'
@@ -161,5 +154,4 @@ jobs:
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION"
           terragrunt run-all plan --destroy --non-interactive \
             --queue-include-external \
-            --working-dir . \
-            --queue-include-dir vault-dedicated-cluster
+            --working-dir .
