@@ -87,6 +87,15 @@ jobs:
           content=$(cat .github/terraform--lab-cloud-k8s/inputsets/${{ github.event.inputs.azure_inputsets }}.json | jq -c .)
           echo "json=$content" >> $GITHUB_OUTPUT
 
+      - name: Debug
+        run: |
+          echo "Input JSON"
+          echo "${{ steps.inputset.outputs.json }}"
+          echo "----"
+          echo "{\"ref\":\"main\",\"inputs\":${{ steps.inputset.outputs.json }}}"
+          echo "----"
+          echo "${{ github.repository }}"
+
       - name: AZURE - Trigger deploy workflow
         if: ${{ github.event.inputs.deploy_azure == 'true' }}
         uses: peter-evans/repository-dispatch@v4
