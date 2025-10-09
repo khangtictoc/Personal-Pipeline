@@ -15,7 +15,7 @@ on:
       # -------------- AZURE --------------
 
       deploy_azure:
-        description: "Deploy Azure Infra ?"
+        description: "Azure Deploy ?"
         required: true
         default: false
         type: boolean
@@ -34,7 +34,7 @@ on:
       # -------------- AWS --------------
 
       deploy_aws:
-        description: "Deploy AWS Infra ?"
+        description: "AWS Deploy ?"
         required: true
         default: false
         type: boolean
@@ -53,7 +53,7 @@ on:
       # -------------- HCP --------------
 
       deploy_hcp:
-        description: "Deploy HCP Infra ?"
+        description: "HCP Deploy ?"
         required: true
         default: false
         type: boolean
