@@ -1,4 +1,4 @@
-name: "Terraform - Kubernetes Cloud Lab"
+name: "Terraform - Deploy Kubernetes Single Cloud"
 
 on:
   # push:
@@ -8,13 +8,15 @@ on:
   # schedule:
   #   # Runs at 07:00 AM in every month.
   #   - cron: "0 17 */1 * *"
+  repository_dispatch:
+    types: [terraform_deploy_kubernetes_single_cloud]
 
   # Optional: You can also allow manual runs
   workflow_dispatch:
     inputs:
       cloud_provider:
         description: "Choose cloud platform for AKS/EKS"
-        required: true
+        required: false
         default: "azure"
         type: choice
         options:
@@ -24,7 +26,7 @@ on:
           - hcp
       region_aws:
         description: "Choose region for EKS"
-        required: true
+        required: false
         default: "us-east-1"
         type: choice
         options:
@@ -34,7 +36,7 @@ on:
 
       region_azure:
         description: "Choose region for AKS"
-        required: true
+        required: false
         default: "Japan East"
         type: choice
         options:
@@ -43,7 +45,7 @@ on:
           - Japan East
       region_hcp:
         description: "Choose region for HCP"
-        required: true
+        required: false
         default: "us-east-1"
         type: choice
         options:
@@ -52,7 +54,7 @@ on:
           - ap-east-1
       environment:
         description: "Choose environment"
-        required: true
+        required: false
         default: "dev"
         type: choice
         options:
@@ -61,7 +63,7 @@ on:
           - stg
       terraform_action:
         description: "Choose Terraform action"
-        required: true
+        required: false
         default: "apply"
         type: choice
         options:

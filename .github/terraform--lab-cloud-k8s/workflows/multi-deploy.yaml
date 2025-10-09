@@ -1,0 +1,97 @@
+name: "Terraform - Kubernetes Multi-cloud Lab"
+
+on:
+  # push:
+  #   branches:
+  #     - main
+
+  # schedule:
+  #   # Runs at 07:00 AM in every month.
+  #   - cron: "0 17 */1 * *"
+
+  # Optional: You can also allow manual runs
+  workflow_dispatch:
+    inputs:
+      deploy_azure:
+        description: "Deploy Azure Infra ?"
+        required: true
+        default: false
+        type: boolean
+        options:
+          - true
+          - false
+      azure_inputsets:
+        description: "Choose inputSets for Azure"
+        required: true
+        default: "Azure_JapanEast_Plan.json"
+        type: choice
+        options:
+          - Azure_JapanEast_Plan.json
+          - Azure_JapanEast_Apply.json
+          - Azure_JapanEast_Destroy.json
+          - Azure_EastUS2_Plan_Destroy.json
+      deploy_aws:
+        description: "Deploy AWS Infra ?"
+        required: true
+        default: false
+        type: boolean
+        options:
+          - true
+          - false
+      aws_inputsets:
+        description: "Choose inputSets for AWS"
+        required: true
+        default: "AWS_us-east-1_Plan"
+        type: choice
+        options:
+          - AWS_us-east-1_Plan
+          - AWS_us-east-1_Apply
+          - AWS_us-east-1_Destroy
+          - AWS_us-west-2_Plan_Destroy
+      deploy_hcp:
+        description: "Deploy HCP Infra ?"
+        required: true
+        default: false
+        type: boolean
+        options:
+          - true
+          - false
+      hcp_inputsets:
+        description: "Choose inputSets for HCP"
+        required: true
+        default: "HCP_us-east-1_Plan"
+        type: choice
+        options:
+          - HCP_us-east-1_Plan
+          - HCP_us-east-1_Apply
+          - HCP_us-east-1_Destroy
+          - HCP_us-west-2_Plan_Destroy
+
+env:
+  Dummy_Env: "This is dummy env"
+
+jobs:
+  verify-configuration:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: AZURE - Read JSON input set
+        if: ${{ github.event.inputs.deploy_azure == 'true' }}
+        id: inputset
+        run: |
+          content=$(cat .github/terraform--lab-cloud-k8s/inputsets/${{ github.event.inputs.azure_inputsets }} | jq -c .)
+          echo "json=$content" >> $GITHUB_OUTPUT
+
+      - name: AZURE - Trigger deploy workflow
+        if: ${{ github.event.inputs.deploy_azure == 'true' }}
+        uses: peter-evans/workflow-dispatch@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          ref: main
+          event-type: "terraform_deploy_kubernetes_single_cloud"
+          client-payload: |
+            {"ref":"main","inputs":${{ steps.inputset.outputs.json }}}

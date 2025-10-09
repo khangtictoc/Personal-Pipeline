@@ -1,0 +1,6 @@
+{
+    "cloud_provider": "aws",
+    "region_aws": "us-east-1",
+    "environment": "dev",
+    "terraform_action": "plan"
+}
