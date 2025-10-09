@@ -12,32 +12,33 @@ on:
   # Optional: You can also allow manual runs
   workflow_dispatch:
     inputs:
+      # -------------- AZURE --------------
+
       deploy_azure:
         description: "Deploy Azure Infra ?"
         required: true
         default: false
         type: boolean
-        options:
-          - true
-          - false
+
       azure_inputsets:
         description: "Choose inputSets for Azure"
         required: true
-        default: "Azure_JapanEast_Plan.json"
+        default: "Azure_JapanEast_Plan"
         type: choice
         options:
-          - Azure_JapanEast_Plan.json
-          - Azure_JapanEast_Apply.json
-          - Azure_JapanEast_Destroy.json
-          - Azure_EastUS2_Plan_Destroy.json
+          - Azure_JapanEast_Plan
+          - Azure_JapanEast_Apply
+          - Azure_JapanEast_Destroy
+          - Azure_EastUS2_Plan_Destroy
+
+      # -------------- AWS --------------
+
       deploy_aws:
         description: "Deploy AWS Infra ?"
         required: true
         default: false
         type: boolean
-        options:
-          - true
-          - false
+
       aws_inputsets:
         description: "Choose inputSets for AWS"
         required: true
@@ -48,14 +49,15 @@ on:
           - AWS_us-east-1_Apply
           - AWS_us-east-1_Destroy
           - AWS_us-west-2_Plan_Destroy
+
+      # -------------- HCP --------------
+
       deploy_hcp:
         description: "Deploy HCP Infra ?"
         required: true
         default: false
         type: boolean
-        options:
-          - true
-          - false
+
       hcp_inputsets:
         description: "Choose inputSets for HCP"
         required: true
@@ -82,16 +84,15 @@ jobs:
         if: ${{ github.event.inputs.deploy_azure == 'true' }}
         id: inputset
         run: |
-          content=$(cat .github/terraform--lab-cloud-k8s/inputsets/${{ github.event.inputs.azure_inputsets }} | jq -c .)
+          content=$(cat .github/terraform--lab-cloud-k8s/inputsets/${{ github.event.inputs.azure_inputsets }}.json | jq -c .)
           echo "json=$content" >> $GITHUB_OUTPUT
 
       - name: AZURE - Trigger deploy workflow
         if: ${{ github.event.inputs.deploy_azure == 'true' }}
-        uses: peter-evans/workflow-dispatch@v1
+        uses: peter-evans/repository-dispatch@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
-          ref: main
           event-type: "terraform_deploy_kubernetes_single_cloud"
           client-payload: |
             {"ref":"main","inputs":${{ steps.inputset.outputs.json }}}
