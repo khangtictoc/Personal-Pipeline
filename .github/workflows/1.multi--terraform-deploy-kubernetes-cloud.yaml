@@ -85,7 +85,7 @@ jobs:
         id: inputset
         run: |
           content=$(cat .github/terraform--lab-cloud-k8s/inputsets/${{ github.event.inputs.azure_inputsets }}.json | jq -c .)
-          echo "json=$content" >> $GITHUB_OUTPUT
+          echo "$content" >> $GITHUB_OUTPUT
 
       - name: Debug
         run: |
