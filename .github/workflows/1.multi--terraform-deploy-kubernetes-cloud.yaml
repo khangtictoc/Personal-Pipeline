@@ -100,7 +100,7 @@ jobs:
         if: ${{ github.event.inputs.deploy_azure == 'true' }}
         uses: peter-evans/repository-dispatch@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_GITHUB }}
           repository: ${{ github.repository }}
           event-type: "terraform_deploy_kubernetes_single_cloud"
           client-payload: |
