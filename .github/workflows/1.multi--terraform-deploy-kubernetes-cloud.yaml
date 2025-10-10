@@ -134,4 +134,9 @@ jobs:
           -H "Authorization: Bearer ${{ secrets.PAT_GITHUB }}" \
           -H "X-GitHub-Api-Version: 2022-11-28" \
           https://api.github.com/repos/${{ github.repository }}/actions/workflows/${{ steps.get_workflow_id.outputs.workflow_id }}/dispatches \
-          -d '{"ref":"main","inputs":${{ steps.inputset.outputs.json }}}'
+          -d @- <<EOF
+            {
+              "ref": "main",
+              "inputs": ${{ steps.inputset.outputs.json }}
+            }
+          EOF
