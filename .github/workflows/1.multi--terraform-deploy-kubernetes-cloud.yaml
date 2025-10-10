@@ -96,12 +96,39 @@ jobs:
           echo "----"
           echo "${{ github.repository }}"
 
+      - name: Get workflow ID by name
+        id: get_workflow_id
+        run: |
+          echo "Fetching all workflows..."
+          curl -s -L \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.PAT_GITHUB }}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/${{ github.repository }}/actions/workflows \
+            > workflows.json
+
+          if [ ! -s workflows.json ]; then
+            echo "Error: workflows.json is empty. API call failed."
+            cat workflows.json
+            exit 1
+          fi
+
+          WORKFLOW_ID=$(jq -r '.workflows[] | select(.name == "Terraform - Kubernetes Multi-cloud Lab") | .id' workflows.json)
+
+          if [ -z "$WORKFLOW_ID" ]; then
+            echo "Error: Workflow ID not found."
+            exit 1
+          fi
+
+          echo "workflow_id=$WORKFLOW_ID" >> $GITHUB_OUTPUT
+
       - name: AZURE - Trigger deploy workflow
         if: ${{ github.event.inputs.deploy_azure == 'true' }}
-        uses: peter-evans/repository-dispatch@v4
-        with:
-          token: ${{ secrets.PAT_GITHUB }}
-          repository: ${{ github.repository }}
-          event-type: "terraform_deploy_kubernetes_single_cloud"
-          client-payload: |
-            {"ref":"main","inputs":${{ steps.inputset.outputs.json }}}
+        run: |
+          curl -L \
+          -X POST \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{ secrets.PAT_GITHUB }}" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          https://api.github.com/repos/${{ github.repository }}/actions/workflows/${{ steps.get_workflow_id.outputs.workflow_id }}/dispatches \
+          -d '{"ref":"main","inputs":${{ steps.inputset.outputs.json }}}'

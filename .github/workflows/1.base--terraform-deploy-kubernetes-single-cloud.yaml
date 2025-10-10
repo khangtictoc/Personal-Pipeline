@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
     inputs:
       cloud_provider:
-        description: "Choose cloud platform for AKS/EKS"
+        description: "Choose Cloud Provider"
         required: false
         default: "azure"
         type: choice
@@ -25,7 +25,7 @@ on:
           - gcp
           - hcp
       region_aws:
-        description: "Choose region for EKS"
+        description: "Choose Region for EKS"
         required: false
         default: "us-east-1"
         type: choice
@@ -35,7 +35,7 @@ on:
           - ap-east-1
 
       region_azure:
-        description: "Choose region for AKS"
+        description: "Choose Region for AKS"
         required: false
         default: "Japan East"
         type: choice
@@ -44,7 +44,7 @@ on:
           - West US 2
           - Japan East
       region_hcp:
-        description: "Choose region for HCP"
+        description: "Choose Region for HCP"
         required: false
         default: "us-east-1"
         type: choice
@@ -53,7 +53,7 @@ on:
           - us-west-2
           - ap-east-1
       environment:
-        description: "Choose environment"
+        description: "Choose Environment"
         required: false
         default: "dev"
         type: choice
@@ -62,7 +62,7 @@ on:
           - prod
           - stg
       terraform_action:
-        description: "Choose Terraform action"
+        description: "Choose Terraform Action"
         required: false
         default: "apply"
         type: choice
