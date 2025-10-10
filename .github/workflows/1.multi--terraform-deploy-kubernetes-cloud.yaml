@@ -113,7 +113,7 @@ jobs:
             exit 1
           fi
 
-          WORKFLOW_ID=$(jq -r '.workflows[] | select(.name == "Terraform - Kubernetes Multi-cloud Lab") | .id' workflows.json)
+          WORKFLOW_ID=$(jq -r '.workflows[] | select(.name == "Terraform - Deploy Kubernetes Single Cloud") | .id' workflows.json)
 
           if [ -z "$WORKFLOW_ID" ]; then
             echo "Error: Workflow ID not found."
