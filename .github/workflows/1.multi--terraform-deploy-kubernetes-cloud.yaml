@@ -64,9 +64,9 @@ on:
         default: "HCP_us-east-1_Plan"
         type: choice
         options:
-          - HCP_us-east-1_Plan
-          - HCP_us-east-1_Apply
-          - HCP_us-east-1_Destroy
+          - HCP_us-west-2_Plan
+          - HCP_us-west-2_Apply
+          - HCP_us-west-2_Destroy
           - HCP_us-west-2_Plan_Destroy
 
 env:
