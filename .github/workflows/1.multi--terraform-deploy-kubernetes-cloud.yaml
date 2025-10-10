@@ -137,6 +137,6 @@ jobs:
           -d @- <<EOF
             {
               "ref": "main",
-              "inputs": ${{ steps.inputset.outputs.json }}
+              "inputs": fromJson(${{ steps.inputset.outputs.json }})
             }
           EOF
