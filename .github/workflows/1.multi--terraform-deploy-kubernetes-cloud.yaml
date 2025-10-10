@@ -84,7 +84,7 @@ jobs:
         if: ${{ github.event.inputs.deploy_azure == 'true' }}
         id: inputset
         run: |
-          content=$(jq -c . .github/terraform--lab-cloud-k8s/inputsets/Azure_JapanEast_Plan.json | jq -R .)
+          content=$(jq -c . .github/inputsets/terraform--lab-cloud-k8s/Azure_JapanEast_Plan.json | jq -R .)
           echo "json=$content" >> $GITHUB_OUTPUT
 
       - name: Debug

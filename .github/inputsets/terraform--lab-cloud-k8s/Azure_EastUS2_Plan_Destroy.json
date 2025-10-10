@@ -1,0 +1,6 @@
+{
+    "cloud_provider": "azure",
+    "region_azure": "Japan East",
+    "environment": "dev",
+    "terraform_action": "plan-destroy"
+}

@@ -1,0 +1,6 @@
+{
+    "cloud_provider": "hcp",
+    "region_azure": "us-west-2",
+    "environment": "dev",
+    "terraform_action": "destroy"
+}

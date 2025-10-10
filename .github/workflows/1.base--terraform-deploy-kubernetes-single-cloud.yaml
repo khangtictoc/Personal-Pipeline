@@ -70,7 +70,7 @@ on:
           - plan
           - apply
           - plan & apply
-          - plan --destroy
+          - plan-destroy
           - destroy
 
 env:
@@ -153,7 +153,7 @@ jobs:
             --working-dir .
 
       - name: Terragrunt Plan Destroy
-        if: github.event.inputs.terraform_action == 'plan --destroy'
+        if: github.event.inputs.terraform_action == 'plan-destroy'
         run: |
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION"
           terragrunt run-all plan --destroy --non-interactive \
