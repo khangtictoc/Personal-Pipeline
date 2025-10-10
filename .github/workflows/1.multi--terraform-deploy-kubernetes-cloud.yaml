@@ -73,7 +73,7 @@ env:
   Dummy_Env: "This is dummy env"
 
 jobs:
-  verify-configuration:
+  multi-cloud-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -121,6 +121,9 @@ jobs:
           fi
 
           echo "workflow_id=$WORKFLOW_ID" >> $GITHUB_OUTPUT
+          echo "Found workflow ID: $WORKFLOW_ID"
+          echo "----"
+          echo "${{ steps.inputset.outputs.json }}"
 
       - name: AZURE - Trigger deploy workflow
         if: ${{ github.event.inputs.deploy_azure == 'true' }}
