@@ -37,12 +37,12 @@ on:
       region_azure:
         description: "Choose Region for AKS"
         required: false
-        default: "Japan East"
+        default: "Japan West"
         type: choice
         options:
           - East US
           - West US 2
-          - Japan East
+          - Japan West
       region_hcp:
         description: "Choose Region for HCP"
         required: false
