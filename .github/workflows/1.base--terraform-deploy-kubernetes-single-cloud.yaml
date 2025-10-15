@@ -100,6 +100,8 @@ jobs:
           echo "ARM_CLIENT_SECRET: ${ARM_CLIENT_SECRET:0:4}****"
           echo "AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:0:4}****"
           echo "AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:0:4}****"
+          echo "HCP_CLIENT_ID: ${HCP_CLIENT_ID:0:4}****"
+          echo "HCP_CLIENT_SECRET: ${HCP_CLIENT_SECRET:0:4}****"
 
       - name: Verify Input
         run: |
