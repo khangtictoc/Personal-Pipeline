@@ -109,7 +109,7 @@ jobs:
         run: |
           git clone https://github.com/khangtictoc/ArgoCD-Apps.git "OSS"
 
-      - name: "[CLI] Install ArgoCD"
+      - name: "Install ArgoCD CLI"
         run: |
           curl -sS https://raw.githubusercontent.com/khangtictoc/Productive-Workspace-Set-Up/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/argocd_cli.sh | sh
 
