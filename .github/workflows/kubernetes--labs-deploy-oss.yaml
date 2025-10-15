@@ -74,9 +74,9 @@ jobs:
         run: |
           kubectl apply -f manifest/default.appproject.yaml
 
-      - name: "Install Pre-requisite"
+      - name: "[Pre-requisite] Create Namespace"
         run: |
-          curl -sS https://raw.githubusercontent.com/khangtictoc/ArgoCD-Apps/refs/heads/main/script/create_namespace.sh | sh
+          kubectl apply -f https://raw.githubusercontent.com/khangtictoc/ArgoCD-Apps/refs/heads/main/manifest/namespace/cluster-aio.yaml
 
       - name: "[K8S] [APPLY] Install NGINX Ingress Controller"
         if: contains(github.event.inputs.kubectl_action, 'apply')
