@@ -182,15 +182,16 @@ jobs:
       - name: Kubernetes Components - Terragrunt Plan
         if: true
         run: |
-          cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION"
-          terragrunt run-all plan --non-interactive \
-            --queue-include-external \
-            --working-dir .
+          echo "${{ github.event.inputs.terraform_action == 'plan' && github.event.inputs.deploy_kubernetes == true }}"
+          # cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/kubernetes/$REGION"
+          # terragrunt run-all plan --non-interactive \
+          #   --queue-include-external \
+          #   --working-dir .
 
       - name: Kubernetes Components - Terragrunt Apply (Auto Approve)
         if: ${{ (github.event.inputs.terraform_action == 'apply') && (github.event.inputs.deploy_kubernetes == true) }}
         run: |
-          cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION"
+          cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/kubernetes/$REGION"
           terragrunt run-all apply --non-interactive \
             --queue-include-external \
             --working-dir .
@@ -198,7 +199,7 @@ jobs:
       - name: Kubernetes Components - Terragrunt Destroy (Auto Approve)
         if: ${{ github.event.inputs.terraform_action == 'destroy' && (github.event.inputs.deploy_kubernetes == true) }}
         run: |
-          cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION"
+          cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/kubernetes/$REGION"
           terragrunt run-all destroy --non-interactive \
             --queue-include-external \
             --working-dir .
@@ -206,7 +207,7 @@ jobs:
       - name: Kubernetes Components - Terragrunt Plan Destroy
         if: ${{ github.event.inputs.terraform_action == 'plan-destroy' && (github.event.inputs.deploy_kubernetes == true) }}
         run: |
-          cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION"
+          cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/kubernetes/$REGION"
           terragrunt run-all plan --destroy --non-interactive \
             --queue-include-external \
             --working-dir .
