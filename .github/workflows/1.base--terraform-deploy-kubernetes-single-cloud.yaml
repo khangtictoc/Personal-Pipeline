@@ -24,6 +24,7 @@ on:
           - aws
           - gcp
           - hcp
+          - kubenetes
       region_aws:
         description: "Choose Region for EKS"
         required: false
