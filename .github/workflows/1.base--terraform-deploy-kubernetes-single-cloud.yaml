@@ -180,7 +180,7 @@ jobs:
             --queue-include-external \
             --working-dir .
       - name: Kubernetes Components - Terragrunt Plan
-        if: (github.event.inputs.terraform_action == 'plan') && (github.event.inputs.deploy_kubernetes == true)
+        if: github.event.inputs.terraform_action == 'plan' && github.event.inputs.deploy_kubernetes == true
         run: |
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION"
           terragrunt run-all plan --non-interactive \
