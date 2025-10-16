@@ -87,7 +87,6 @@ on:
         options:
           - plan
           - apply
-          - plan & apply
           - plan-destroy
           - destroy
 
@@ -150,7 +149,7 @@ jobs:
           git clone --depth 1 https://github.com/khangtictoc/Terragrunt_Project_Structure_Design.git
 
       - name: Terragrunt Plan
-        if: ${{ contains(github.event.inputs.terraform_action, 'plan') && (github.event.inputs.deploy_kubernetes == false) }}
+        if: ${{ (github.event.inputs.terraform_action == 'plan') && (github.event.inputs.deploy_kubernetes == false) }}
         run: |
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION"
           terragrunt run-all plan --non-interactive \
@@ -158,7 +157,7 @@ jobs:
             --working-dir .
 
       - name: Terragrunt Apply (Auto Approve)
-        if: ${{ contains(github.event.inputs.terraform_action, 'apply') && (github.event.inputs.deploy_kubernetes == false) }}
+        if: ${{ (github.event.inputs.terraform_action == 'apply') && (github.event.inputs.deploy_kubernetes == false) }}
         run: |
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION"
           terragrunt run-all apply --non-interactive \
@@ -181,7 +180,7 @@ jobs:
             --queue-include-external \
             --working-dir .
       - name: Kubernetes Components - Terragrunt Plan
-        if: ${{ contains(github.event.inputs.terraform_action, 'plan') && (github.event.inputs.deploy_kubernetes == true) }}
+        if: ${{ (github.event.inputs.terraform_action == 'plan') && (github.event.inputs.deploy_kubernetes == true) }}
         run: |
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION"
           terragrunt run-all plan --non-interactive \
@@ -189,7 +188,7 @@ jobs:
             --working-dir .
 
       - name: Kubernetes Components - Terragrunt Apply (Auto Approve)
-        if: ${{ contains(github.event.inputs.terraform_action, 'apply') && (github.event.inputs.deploy_kubernetes == true) }}
+        if: ${{ (github.event.inputs.terraform_action == 'apply') && (github.event.inputs.deploy_kubernetes == true) }}
         run: |
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION"
           terragrunt run-all apply --non-interactive \
