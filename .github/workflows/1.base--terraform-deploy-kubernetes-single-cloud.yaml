@@ -183,7 +183,7 @@ jobs:
         if: true
         run: |
           echo "${{ github.event.inputs.terraform_action == 'plan' }}"
-          echo "${{ github.event.inputs.deploy_kubernetes == true }}"
+          echo "${{ github.event.inputs.deploy_kubernetes == 'true' }}"
           # cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/kubernetes/$REGION"
           # terragrunt run-all plan --non-interactive \
           #   --queue-include-external \
