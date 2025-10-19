@@ -52,7 +52,7 @@ on:
       region_hcp:
         description: "Choose Region for HCP"
         required: false
-        default: "us-east-1"
+        default: "us-west-2"
         type: choice
         options:
           - us-east-1
