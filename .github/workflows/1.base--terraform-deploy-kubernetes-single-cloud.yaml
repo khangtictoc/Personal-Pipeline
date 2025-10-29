@@ -30,6 +30,19 @@ on:
           - gcp
           - hcp
           - kubenetes
+      modules:
+        description: "Choose Cloud Provider"
+        required: true
+        default: "aks"
+        type: choice
+        options:
+          - eks
+          - vnet
+          - appgw
+          - aks
+          - gke
+          - vault-dedicated-cluster
+          - vault-components
       region_aws:
         description: "Choose Region for EKS"
         required: false
@@ -152,7 +165,7 @@ jobs:
       - name: Terragrunt Plan
         if: ${{ github.event.inputs.terraform_action == 'plan' && github.event.inputs.deploy_kubernetes == 'false' }}
         run: |
-          cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION"
+          cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION/${{ github.event.inputs.modules }}"
           terragrunt run-all plan --non-interactive \
             --queue-include-external \
             --working-dir .
