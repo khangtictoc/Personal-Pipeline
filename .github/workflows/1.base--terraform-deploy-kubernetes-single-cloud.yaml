@@ -174,7 +174,7 @@ jobs:
       - name: Terragrunt Apply (Auto Approve)
         if: ${{ github.event.inputs.terraform_action == 'apply' && github.event.inputs.deploy_kubernetes == 'false' }}
         run: |
-          cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION"
+          cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION/${{ github.event.inputs.modules }}"
           terragrunt run-all apply --non-interactive \
             --queue-include-external \
             --working-dir .
@@ -182,7 +182,7 @@ jobs:
       - name: Terragrunt Destroy (Auto Approve)
         if: ${{ github.event.inputs.terraform_action == 'destroy' && github.event.inputs.deploy_kubernetes == 'false' }}
         run: |
-          cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION"
+          cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION/${{ github.event.inputs.modules }}"
           terragrunt run-all destroy --non-interactive \
             --queue-include-external \
             --working-dir .
@@ -190,7 +190,7 @@ jobs:
       - name: Terragrunt Plan Destroy
         if: ${{ github.event.inputs.terraform_action == 'plan-destroy' && github.event.inputs.deploy_kubernetes == 'false' }}
         run: |
-          cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION"
+          cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION/${{ github.event.inputs.modules }}"
           terragrunt run-all plan --destroy --non-interactive \
             --queue-include-external \
             --working-dir .
