@@ -138,6 +138,7 @@ jobs:
         run: |
           echo "Deploy Kubernetes: ${{ github.event.inputs.deploy_kubernetes }}"
           echo "Cloud Provider: ${{ github.event.inputs.cloud_provider }}"
+          echo "Module: ${{ github.event.inputs.modules }}"
           echo "Region: $REGION"
           echo "Environment: ${{ github.event.inputs.environment }}"
           echo "Terraform Action: ${{ github.event.inputs.terraform_action }}"
