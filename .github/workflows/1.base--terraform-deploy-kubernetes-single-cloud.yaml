@@ -31,12 +31,13 @@ on:
           - hcp
           - kubenetes
       modules:
-        description: "Choose Cloud Provider"
+        description: "Choose Cloud Modules"
         required: true
         default: "aks"
         type: choice
         options:
           - eks
+          - vpc
           - vnet
           - appgw
           - aks
