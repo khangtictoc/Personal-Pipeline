@@ -148,8 +148,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v5
       - name: Install AWS CLI
         run: |
           curl -sS https://raw.githubusercontent.com/khangtictoc/Productive-Workspace-Set-Up/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/aws_cli.sh | bash
@@ -216,8 +214,10 @@ jobs:
       - name: Kubernetes Components - Terragrunt Destroy (Auto Approve)
         if: ${{ github.event.inputs.terraform_action == 'destroy' && github.event.inputs.deploy_kubernetes == 'true' }}
         run: |
-          chmod +x script/terragrunt-wrapper.sh
-          script/terragrunt-wrapper.sh "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/kubernetes/${{ github.event.inputs.cloud_provider }}/$REGION"
+          cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/kubernetes/${{ github.event.inputs.cloud_provider }}/$REGION"
+          terragrunt run-all destroy --non-interactive \
+            --queue-include-external \
+            --working-dir .
 
       - name: Kubernetes Components - Terragrunt Plan Destroy
         if: ${{ github.event.inputs.terraform_action == 'plan-destroy' && github.event.inputs.deploy_kubernetes == 'true' }}
@@ -232,26 +232,9 @@ jobs:
     if: always()
     needs: cloud-k8s-deployment
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
       - name: Cleanup resources
         run: |
-          echo "Post-job cleanup running..."
-          LOCK_TABLE="terragrunt-state-lock"
-          get_lock_id() {
-            aws dynamodb scan \
-              --table-name "${LOCK_TABLE}" \
-              --region "${REGION}" \
-              --query "Items[0].LockID.S" \
-              --output text 2>/dev/null || true
-          }
-
-          # Cleanup function to force unlock
-          cleanup() {
-            echo "[INFO] Caught signal, attempting to force unlock..."
-            LOCK_ID=$(get_lock_id)
-            if [[ -n "${LOCK_ID}" && "${LOCK_ID}" != "None" ]]; then
-              echo "[INFO] Found lock ID: ${LOCK_ID}, unlocking..."
-              terraform force-unlock -force "${LOCK_ID}" || true
-            else
-              echo "[INFO] No lock ID found, nothing to unlock."
-            fi
-          }
+          chmod +x script/remove_tf_lock.sh
+          ./script/remove_tf_lock.sh $REGION "terragrunt-state-lock"
