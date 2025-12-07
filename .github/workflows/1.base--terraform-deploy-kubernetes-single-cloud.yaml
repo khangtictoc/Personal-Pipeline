@@ -216,8 +216,7 @@ jobs:
       - name: Kubernetes Components - Terragrunt Destroy (Auto Approve)
         if: ${{ github.event.inputs.terraform_action == 'destroy' && github.event.inputs.deploy_kubernetes == 'true' }}
         run: |
-          ls -al
-          pwd
+          chmod +x terragrunt-wrapper.sh
           script/terragrunt-wrapper.sh "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/kubernetes/${{ github.event.inputs.cloud_provider }}/$REGION"
 
       - name: Kubernetes Components - Terragrunt Plan Destroy
