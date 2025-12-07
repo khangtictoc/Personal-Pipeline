@@ -5,6 +5,8 @@ set -euo pipefail
 export AWS_PAGER=""
 export AWS_CLI_PAGER=""
 
+PATH_TO_TERRAGRUNT_DIR="${1:-.}"
+
 REGION="us-east-1"
 LOCK_TABLE="terragrunt-state-lock"   # replace with your DynamoDB table name
 
@@ -33,6 +35,8 @@ cleanup() {
 trap cleanup SIGINT SIGTERM
 
 echo "[INFO] Starting Terragrunt destroy..."
+
+cd "${PATH_TO_TERRAGRUNT_DIR}"
 terragrunt run-all destroy --non-interactive \
     --queue-include-external \
     --working-dir .
