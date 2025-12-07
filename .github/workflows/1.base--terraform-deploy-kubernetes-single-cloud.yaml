@@ -226,3 +226,32 @@ jobs:
           terragrunt run-all plan --destroy --non-interactive \
             --queue-include-external \
             --working-dir .
+
+  cleanup:
+    runs-on: ubuntu-latest
+    if: always()
+    needs: cloud-k8s-deployment
+    steps:
+      - name: Cleanup resources
+        run: |
+          echo "Post-job cleanup running..."
+          LOCK_TABLE="terragrunt-state-lock"
+          get_lock_id() {
+            aws dynamodb scan \
+              --table-name "${LOCK_TABLE}" \
+              --region "${REGION}" \
+              --query "Items[0].LockID.S" \
+              --output text 2>/dev/null || true
+          }
+
+          # Cleanup function to force unlock
+          cleanup() {
+            echo "[INFO] Caught signal, attempting to force unlock..."
+            LOCK_ID=$(get_lock_id)
+            if [[ -n "${LOCK_ID}" && "${LOCK_ID}" != "None" ]]; then
+              echo "[INFO] Found lock ID: ${LOCK_ID}, unlocking..."
+              terraform force-unlock -force "${LOCK_ID}" || true
+            else
+              echo "[INFO] No lock ID found, nothing to unlock."
+            fi
+          }
