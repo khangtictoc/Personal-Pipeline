@@ -6,7 +6,7 @@ export AWS_PAGER=""
 export AWS_CLI_PAGER=""
 
 REGION="us-east-1"
-LOCK_TABLE="terraform-locks"   # replace with your DynamoDB table name
+LOCK_TABLE="terragrunt-state-lock"   # replace with your DynamoDB table name
 
 # Function to find current lock ID in DynamoDB
 get_lock_id() {
