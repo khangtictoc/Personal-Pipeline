@@ -238,3 +238,4 @@ jobs:
         run: |
           chmod +x script/remove_tf_lock.sh
           ./script/remove_tf_lock.sh $REGION "terragrunt-state-lock"
+  
