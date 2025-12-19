@@ -126,6 +126,7 @@ jobs:
 
       - name: Verify Secret
         run: |
+          echo "GITHUB_PAT_TOKEN: ${GH_TOKEN:0:4}****"
           echo "ARM_TENANT_ID: ${ARM_TENANT_ID:0:4}****"
           echo "ARM_SUBSCRIPTION_ID: ${ARM_SUBSCRIPTION_ID:0:4}****"
           echo "ARM_CLIENT_ID: ${ARM_CLIENT_ID:0:4}****"

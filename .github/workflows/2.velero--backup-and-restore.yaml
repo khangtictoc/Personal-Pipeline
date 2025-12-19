@@ -49,6 +49,7 @@ on:
           - DummyValue2
           - DummyValue3
 env:
+  GH_TOKEN: ${{ secrets.PAT_GITHUB }}
   ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
   ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
   ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -63,6 +64,7 @@ jobs:
     steps:
       - name: Verify Secret
         run: |
+          echo "GITHUB_PAT_TOKEN: ${GH_TOKEN:0:4}****"
           echo "ARM_TENANT_ID: ${ARM_TENANT_ID:0:4}****"
           echo "ARM_SUBSCRIPTION_ID: ${ARM_SUBSCRIPTION_ID:0:4}****"
           echo "ARM_CLIENT_ID: ${ARM_CLIENT_ID:0:4}****"
@@ -78,7 +80,7 @@ jobs:
           echo "Cloud Provider: ${{ github.event.inputs.cloud_provider }}"
           echo "Region: $REGION"
 
-  onePassword-credential-update:
+  backup-restore-k8s-cloud-cluster:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -88,31 +90,40 @@ jobs:
       - name: Reconcile to Update the Cluster Name
         if: ${{ github.event.inputs.action == 'reconcile' }}
         run: |
-          ls -al
-          pwd
+          YAML_FILE=".github/workflows/2.velero--backup-and-restore.yaml"
 
+          clusters=$(aws eks list-clusters --region "$REGION" --query "clusters" --output text)
 
-          # clusters=$(aws eks list-clusters --region "$REGION" --query "clusters" --output text)
+          if [ -z "$clusters" ]; then
+            echo "Error: No clusters found in region $REGION"
+            exit 1
+          fi
 
-          # if [ -z "$clusters" ]; then
-          #   echo "Error: No clusters found in region $REGION"
-          #   exit 1
-          # fi
+          default_cluster=$(echo "$clusters" | awk '{print $1}')
 
-          # default_cluster=$(echo "$clusters" | awk '{print $1}')
+          # Set Default cluster
+          yq -i ".on.workflow_dispatch.inputs.cluster_name.default = \"$default_cluster\"" "$YAML_FILE"
 
-          # # Set Default cluster
-          # yq -i ".on.workflow_dispatch.inputs.cluster_name.default = \"$default_cluster\"" "$YAML_FILE"
+          # Append each cluster safely
+          yq -i ".on.workflow_dispatch.inputs.cluster_name.options = []" "$YAML_FILE"
+          for c in $clusters; do
+            yq -i ".on.workflow_dispatch.inputs.cluster_name.options += [\"$c\"]" "$YAML_FILE"
+          done
 
-          # # Append each cluster safely
-          # yq -i ".on.workflow_dispatch.inputs.cluster_name.options = []" "$YAML_FILE"
-          # for c in $clusters; do
-          #   yq -i ".on.workflow_dispatch.inputs.cluster_name.options += [\"$c\"]" "$YAML_FILE"
-          # done
+          echo "Updated $YAML_FILE with clusters from region $REGION"
 
-          # echo "Updated $YAML_FILE with clusters from region $REGION"
+          cat $YAML_FILE
+
+          # local username="github-actions[bot]"
+
+          # git config --global user.name "$username"
+          # git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          # git add .
+          # git commit -m "Update: Add cluster's names"
+          # git remote set-url origin https://$username:$GH_TOKEN@github.com/$AUTHOR/$REPO_NAME.git
+          # git push
 
       - name: Install Velero CLI
-        if: ${{ github.event.inputs.action == 'reconcile' }}
+        if: ${{ github.event.inputs.action != 'reconcile' }}
         run: |
           curl -sS https://raw.githubusercontent.com/khangtictoc/Productive-Workspace-Set-Up/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/velero_cli.sh | bash
