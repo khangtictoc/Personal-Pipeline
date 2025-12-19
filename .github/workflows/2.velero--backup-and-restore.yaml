@@ -114,14 +114,14 @@ jobs:
 
           cat $YAML_FILE
 
-          # local username="github-actions[bot]"
+          local username="github-actions[bot]"
 
-          # git config --global user.name "$username"
-          # git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          # git add .
-          # git commit -m "Update: Add cluster's names"
-          # git remote set-url origin https://$username:$GH_TOKEN@github.com/$AUTHOR/$REPO_NAME.git
-          # git push
+          git config --global user.name "$username"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Update: Add cluster's names"
+          git remote set-url origin https://$username:$GH_TOKEN@github.com/$AUTHOR/$REPO_NAME.git
+          git push
 
       - name: Install Velero CLI
         if: ${{ github.event.inputs.action != 'reconcile' }}
