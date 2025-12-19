@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
 YAML_FILE=".github/workflows/2.velero--backup-and-restore.yaml"
+username="github-actions[bot]"
+GITHUB_REPOSITORY=$1
 
 clusters=$(aws eks list-clusters --region "$REGION" --query "clusters" --output text)
 
@@ -24,12 +26,9 @@ echo "Updated $YAML_FILE with clusters from region $REGION"
 
 cat $YAML_FILE
 
-username="github-actions[bot]"
-AUTHOR=khangtictoc
-
 git config --global user.name "$username"
 git config --global user.email "github-actions[bot]@users.noreply.github.com"
 git add .
 git commit -m "Update: Add cluster's names"
-git remote set-url origin https://$username:$GH_TOKEN@github.com/$AUTHOR/$REPO_NAME.git
+git remote set-url origin https://$username:$GH_TOKEN@github.com/$GITHUB_REPOSITORY.git
 git push

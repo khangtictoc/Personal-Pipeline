@@ -91,7 +91,7 @@ jobs:
         if: ${{ github.event.inputs.action == 'reconcile' }}
         run: |
           chmod +x "script/2.velero--backup-and-restore/reconcile.sh"
-          ./script/2.velero--backup-and-restore/reconcile.sh
+          ./script/2.velero--backup-and-restore/reconcile.sh $GITHUB_REPOSITORY
 
       - name: Install Velero CLI
         if: ${{ github.event.inputs.action != 'reconcile' }}
