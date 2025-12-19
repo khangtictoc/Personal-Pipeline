@@ -1,4 +1,4 @@
-name: "00_Github - Re-Activate All Disabled Workflow Current Repo"
+name: "[00] Github - Re-Activate All Disabled Workflow Current Repo"
 
 on:
   # push:

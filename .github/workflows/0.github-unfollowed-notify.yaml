@@ -1,4 +1,4 @@
-name: "Github - Unfollowed Notifier"
+name: "[00] Github - Unfollowed Notifier"
 
 on:
   # push:

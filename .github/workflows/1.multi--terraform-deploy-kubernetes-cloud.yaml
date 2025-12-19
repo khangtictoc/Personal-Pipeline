@@ -1,4 +1,4 @@
-name: "Terraform - Kubernetes Multi-cloud Lab"
+name: "[01.1] Terraform - Kubernetes Multi-cloud Lab"
 
 on:
   # push:
