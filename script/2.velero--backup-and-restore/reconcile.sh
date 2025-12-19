@@ -25,6 +25,7 @@ echo "Updated $YAML_FILE with clusters from region $REGION"
 cat $YAML_FILE
 
 username="github-actions[bot]"
+AUTHOR=khangtictoc
 
 git config --global user.name "$username"
 git config --global user.email "github-actions[bot]@users.noreply.github.com"
