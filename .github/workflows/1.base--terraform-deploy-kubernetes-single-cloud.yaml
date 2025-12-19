@@ -1,4 +1,4 @@
-name: "[01] Terraform - Deploy Kubernetes Single Cloud"
+name: "[01.0] Terraform - Deploy Kubernetes Single Cloud"
 
 on:
   # push:
