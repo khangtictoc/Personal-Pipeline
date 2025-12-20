@@ -4,10 +4,10 @@ on:
   # push:
   #   branches:
   #     - main
-  
+
   schedule:
     # Runs at 7:00 AM every day
-    - cron: '0 7 * * *'
+    - cron: "0 7 * * *"
 
   # Optional: You can also allow manual runs
   workflow_dispatch:
@@ -20,84 +20,78 @@ env:
 jobs:
   check-follow-status:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Install prerequesite packages
-      run: |
-        sudo apt install -y jq
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Install AWS CLI
-      run: |
-        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-        unzip awscliv2.zip
-        sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update
-    
-    - name: Configure AWS Account
-      run: |
-        aws configure set aws_access_key_id ${{ secrets.ACCESS_KEY }}
-        aws configure set aws_secret_access_key ${{ secrets.ACCESS_SECRET }}
-        aws configure set region $AWS_REGION
-        aws configure set output $AWS_OUTPUT
+      - name: Install prerequesite packages
+        run: |
+          sudo apt install -y jq
 
-    - name: List all followers of an authenticated user
-      run: |
-        curl -L \
-        -H "Accept: application/vnd.github+json" \
-        -H "Authorization: Bearer ${{ secrets.PAT_GITHUB }}" \
-        -H "X-GitHub-Api-Version: 2022-11-28" \
-        https://api.github.com/user/followers | jq '.[].login' > crt_followers.txt
-        echo Current Followers:
-        cat crt_followers.txt
-        
-    
-    - name: Download status files from S3 Bucket
-      run: |
-        aws s3 sync s3://github-management/follower-control/ .
-        ls .
-  
-    - name: Show added and deleted users
-      run: |
-        diff -u -b saved_followers.txt crt_followers.txt  | grep '^+' | sed 's/^+//' > new_followed.txt
-        diff -u -b saved_followers.txt crt_followers.txt  | grep '^-' | sed 's/^-//' > new_unfollowed.txt
-        echo "####### NEW FOLLOWED USERS "#######"
-        cat new_followed.txt
-        echo "####### NEW UNFOLLOWED USERS #######"
-        cat new_unfollowed.txt
+      - name: Install AWS CLI
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update
 
-    - name: Prepare for Email Templating
-      run: |
-        followers_list=""
-        while IFS= read -r follow; do
-          followers_list+="<li>${follow}</li>"
-        done < "new_followed.txt"
+      - name: Configure AWS Account
+        run: |
+          aws configure set region $AWS_REGION
+          aws configure set output $AWS_OUTPUT
 
-        unfollowers_list=""
-        while IFS= read -r unfollow; do
-          unfollowers_list+="<li>${unfollow}</li>"
-        done < "new_unfollowed.txt"
+      - name: List all followers of an authenticated user
+        run: |
+          curl -L \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{ secrets.PAT_GITHUB }}" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          https://api.github.com/user/followers | jq '.[].login' > crt_followers.txt
+          echo Current Followers:
+          cat crt_followers.txt
 
-        sed -i "s|<ul id=\"new-followers\">|<ul id=\"new-followers\">$followers_list|" "$EMAIL_TEMPLATE_FILE"
-        sed -i "s|<ul id=\"left-followers\">|<ul id=\"left-followers\">$unfollowers_list|" "$EMAIL_TEMPLATE_FILE"
-        cat $EMAIL_TEMPLATE_FILE
+      - name: Download status files from S3 Bucket
+        run: |
+          aws s3 sync s3://github-management/follower-control/ .
+          ls .
 
-    - name: Upload to S3 and sending Email if changes exists
-      run: |
-        if [ -s new_followed.txt ] || [ -s new_unfollowed.txt ]; then
-            HTML_BODY=$(cat $EMAIL_TEMPLATE_FILE)
-            aws ses send-email \
-              --from "tranhoangkhang09112001@gmail.com" \
-              --destination "ToAddresses=tranhoangkhang09112001@gmail.com" \
-              --message "Subject={Data=Follower Update on Github},Body={Html={Data='$HTML_BODY'}}" \
-              --region us-east-1
-            aws s3 cp crt_followers.txt s3://github-management/follower-control/saved_followers.txt --force
-        else
-            echo "+-----------------------------------------------+"
-            echo "No NEW or LEAVE followers, no action performed."
-            echo "+-----------------------------------------------+"
-        fi
-    
-    
-        
+      - name: Show added and deleted users
+        run: |
+          diff -u -b saved_followers.txt crt_followers.txt  | grep '^+' | sed 's/^+//' > new_followed.txt
+          diff -u -b saved_followers.txt crt_followers.txt  | grep '^-' | sed 's/^-//' > new_unfollowed.txt
+          echo "####### NEW FOLLOWED USERS "#######"
+          cat new_followed.txt
+          echo "####### NEW UNFOLLOWED USERS #######"
+          cat new_unfollowed.txt
+
+      - name: Prepare for Email Templating
+        run: |
+          followers_list=""
+          while IFS= read -r follow; do
+            followers_list+="<li>${follow}</li>"
+          done < "new_followed.txt"
+
+          unfollowers_list=""
+          while IFS= read -r unfollow; do
+            unfollowers_list+="<li>${unfollow}</li>"
+          done < "new_unfollowed.txt"
+
+          sed -i "s|<ul id=\"new-followers\">|<ul id=\"new-followers\">$followers_list|" "$EMAIL_TEMPLATE_FILE"
+          sed -i "s|<ul id=\"left-followers\">|<ul id=\"left-followers\">$unfollowers_list|" "$EMAIL_TEMPLATE_FILE"
+          cat $EMAIL_TEMPLATE_FILE
+
+      - name: Upload to S3 and sending Email if changes exists
+        run: |
+          if [ -s new_followed.txt ] || [ -s new_unfollowed.txt ]; then
+              HTML_BODY=$(cat $EMAIL_TEMPLATE_FILE)
+              aws ses send-email \
+                --from "tranhoangkhang09112001@gmail.com" \
+                --destination "ToAddresses=tranhoangkhang09112001@gmail.com" \
+                --message "Subject={Data=Follower Update on Github},Body={Html={Data='$HTML_BODY'}}" \
+                --region us-east-1
+              aws s3 cp crt_followers.txt s3://github-management/follower-control/saved_followers.txt --force
+          else
+              echo "+-----------------------------------------------+"
+              echo "No NEW or LEAVE followers, no action performed."
+              echo "+-----------------------------------------------+"
+          fi
