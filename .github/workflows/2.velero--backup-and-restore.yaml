@@ -100,3 +100,16 @@ jobs:
         if: ${{ github.event.inputs.action != 'reconcile' }}
         run: |
           curl -sS https://raw.githubusercontent.com/khangtictoc/Productive-Workspace-Set-Up/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/velero_cli.sh | bash
+
+      - name: Velero Fully Backup (Include Volumes)
+        if: ${{ github.event.inputs.action != 'backup' }}
+        run: |
+          current_time=$(date +"%Y/%m/%d-%H:%M:%S")
+          backup_file="${{ github.event.inputs.cluster_name }}-$current_time"
+          velero create backup  --include-cluster-scoped-resources="*" --include-namespaces="*" $backup_file
+
+      - name: Velero Restore
+        if: ${{ github.event.inputs.action != 'restore' }}
+        run: |
+          backup_file="${{ github.event.inputs.restored_version }}"
+          velero restore create $backup_file --from-backup $backup_file
