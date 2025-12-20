@@ -104,12 +104,11 @@ jobs:
       - name: Velero Fully Backup (Include Volumes)
         if: ${{ github.event.inputs.action != 'backup' }}
         run: |
-          current_time=$(date +"%Y/%m/%d-%H:%M:%S")
-          backup_file="${{ github.event.inputs.cluster_name }}-$current_time"
-          velero create backup  --include-cluster-scoped-resources="*" --include-namespaces="*" $backup_file
+          chmod +x "script/2.velero--backup-and-restore/backup.sh"
+          ./script/2.velero--backup-and-restore/backup.sh "${{ github.event.inputs.cluster_name }}"
 
       - name: Velero Restore
         if: ${{ github.event.inputs.action != 'restore' }}
         run: |
-          backup_file="${{ github.event.inputs.restored_version }}"
-          velero restore create $backup_file --from-backup $backup_file
+          chmod +x "script/2.velero--backup-and-restore/restore.sh"
+          ./script/2.velero--backup-and-restore/restore.sh "${{ github.event.inputs.restored_version }}"
