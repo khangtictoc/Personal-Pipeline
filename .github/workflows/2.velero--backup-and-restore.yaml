@@ -90,12 +90,10 @@ jobs:
         uses: actions/checkout@v5
         with:
           persist-credentials: false
-
       - name: Access Cluster with $KUBECONFIG
         if: ${{ github.event.inputs.action != 'reconcile' }}
         run: |
           aws eks update-kubeconfig --name ${{ github.event.inputs.cluster_name }}  --region $REGION
-
       - name: Reconcile to Update the Cluster Name
         if: ${{ github.event.inputs.action == 'reconcile' }}
         run: |
@@ -105,7 +103,6 @@ jobs:
         if: ${{ github.event.inputs.action != 'reconcile' }}
         run: |
           curl -sS https://raw.githubusercontent.com/khangtictoc/Productive-Workspace-Set-Up/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/velero_cli.sh | bash
-
       - name: Velero Fully Backup (Include Volumes)
         if: ${{ github.event.inputs.action == 'backup' }}
         run: |
@@ -113,7 +110,6 @@ jobs:
           ./script/2.velero--backup-and-restore/backup.sh "${{ github.event.inputs.cluster_name }}"
           chmod +x "script/2.velero--backup-and-restore/reconcile.sh"
           ./script/2.velero--backup-and-restore/reconcile.sh $GITHUB_REPOSITORY
-
       - name: Velero Restore
         if: ${{ github.event.inputs.action == 'restore' }}
         run: |
