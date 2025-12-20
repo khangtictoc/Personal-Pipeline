@@ -48,9 +48,10 @@ on:
       restored_version:
         description: "Choose A Version To Restore (First 10 latest)"
         required: false
-        default: "test4"
+        default: "testproject-dev-general-00-2025.12.20-05.04.22"
         type: choice
         options:
+          - testproject-dev-general-00-2025.12.20-05.04.22
           - test4
           - test2
           - test
