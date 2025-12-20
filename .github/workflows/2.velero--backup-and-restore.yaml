@@ -29,7 +29,6 @@ on:
           - us-east-1
           - us-west-2
           - ap-east-1
-
       region_azure:
         description: "Choose Region for AKS"
         required: false
@@ -42,12 +41,10 @@ on:
       cluster_name:
         description: "Pick A Cluster Name"
         required: false
-        default: "DummyValue1"
+        default: "TESTPROJECT-DEV-GENERAL-00"
         type: choice
         options:
-          - DummyValue1
-          - DummyValue2
-          - DummyValue3
+          - TESTPROJECT-DEV-GENERAL-00
 env:
   GH_TOKEN: ${{ secrets.PAT_GITHUB }}
   ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
@@ -57,7 +54,6 @@ env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   REGION: ${{ github.event.inputs.cloud_provider == 'aws' && github.event.inputs.region_aws || github.event.inputs.cloud_provider == 'azure' && github.event.inputs.region_azure }}
-
 jobs:
   verify-configuration:
     runs-on: ubuntu-latest
@@ -73,13 +69,11 @@ jobs:
           echo "AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:0:4}****"
           echo "HCP_CLIENT_ID: ${HCP_CLIENT_ID:0:4}****"
           echo "HCP_CLIENT_SECRET: ${HCP_CLIENT_SECRET:0:4}****"
-
       - name: Verify Input
         run: |
           echo "Action: ${{ github.event.inputs.action }}"
           echo "Cloud Provider: ${{ github.event.inputs.cloud_provider }}"
           echo "Region: $REGION"
-
   backup-restore-k8s-cloud-cluster:
     runs-on: ubuntu-latest
     steps:
@@ -88,13 +82,11 @@ jobs:
         uses: actions/checkout@v5
         with:
           persist-credentials: false
-
       - name: Reconcile to Update the Cluster Name
         if: ${{ github.event.inputs.action == 'reconcile' }}
         run: |
           chmod +x "script/2.velero--backup-and-restore/reconcile.sh"
           ./script/2.velero--backup-and-restore/reconcile.sh $GITHUB_REPOSITORY
-
       - name: Install Velero CLI
         if: ${{ github.event.inputs.action != 'reconcile' }}
         run: |
