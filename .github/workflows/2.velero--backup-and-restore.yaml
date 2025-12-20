@@ -108,9 +108,7 @@ jobs:
 
       - name: Velero Fully Backup (Include Volumes)
         if: ${{ github.event.inputs.action == 'backup' }}
-        run: |
-          chmod +x "script/2.velero--backup-and-restore/backup.sh"
-          ./script/2.velero--backup-and-restore/backup.sh "${{ github.event.inputs.cluster_name }}"
+        run: ./script/2.velero--backup-and-restore/backup.sh "${{ github.event.inputs.cluster_name }}"
 
       - name: Velero Restore
         if: ${{ github.event.inputs.action == 'restore' }}
