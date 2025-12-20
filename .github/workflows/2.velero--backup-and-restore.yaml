@@ -44,7 +44,7 @@ on:
         default: "TESTPROJECT-DEV-GENERAL-00"
         type: choice
         options:
-          - SuperSummy1
+          - TESTPROJECT-DEV-GENERAL-00
 env:
   GH_TOKEN: ${{ secrets.PAT_GITHUB }}
   ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
