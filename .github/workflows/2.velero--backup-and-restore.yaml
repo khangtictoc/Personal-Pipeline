@@ -44,7 +44,7 @@ on:
         default: "TESTPROJECT-DEV-GENERAL-00"
         type: choice
         options:
-          - TESTPROJECT-DEV-GENERAL-00
+          - SuperSummy1
 env:
   GH_TOKEN: ${{ secrets.PAT_GITHUB }}
   ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
@@ -80,8 +80,8 @@ jobs:
       - name: Checkout code
         if: ${{ github.event.inputs.action == 'reconcile' }}
         uses: actions/checkout@v5
-        with:
-          persist-credentials: false
+        # with:
+        #   persist-credentials: false
       - name: Reconcile to Update the Cluster Name
         if: ${{ github.event.inputs.action == 'reconcile' }}
         run: |
