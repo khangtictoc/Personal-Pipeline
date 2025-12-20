@@ -6,7 +6,8 @@ function main(){
 
     current_time=$(date +"%Y.%m.%d-%H.%M.%S")
     cluster_name="$1"
-    backup_file="$cluster_name-$current_time"
+    cluster_name_formatted=$(echo "$cluster_name" | tr '[:upper:]' '[:lower:]')
+    backup_file="$cluster_name_formatted-$current_time"
 
     echo "[INFO] Start backup ..."
     velero create backup  --include-cluster-scoped-resources="*" --include-namespaces="*" $backup_file
