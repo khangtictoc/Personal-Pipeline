@@ -47,7 +47,7 @@ on:
           - SuperSummy1
 
       restored_version:
-        description: "Choose A Version To Restore (10 Latest versions)"
+        description: "Choose A Version To Restore (First 10 latest)"
         required: false
         default: "DummyValue1"
         type: choice
