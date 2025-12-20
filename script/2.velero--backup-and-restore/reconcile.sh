@@ -26,9 +26,11 @@ echo "Updated $YAML_FILE with clusters from region $REGION"
 
 cat $YAML_FILE
 
-git config --global user.name "$username"
+# Push changes to Pipeline Repo
+git config --global user.name "github-actions[bot]"
 git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
 git add .
-git commit -m "Update: Add cluster's names"
-git remote set-url origin https://$username:$GH_TOKEN@github.com/$GITHUB_REPOSITORY.git
-git push
+# Only commit if there are changes to avoid "nothing to commit" errors
+git diff-index --quiet HEAD || git commit -m "Update: Add cluster's names"
+git push origin main
