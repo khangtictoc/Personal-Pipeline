@@ -44,16 +44,16 @@ on:
         default: "TESTPROJECT-DEV-GENERAL-00"
         type: choice
         options:
-          - SuperSummy1
-
+          - TESTPROJECT-DEV-GENERAL-00
       restored_version:
         description: "Choose A Version To Restore (First 10 latest)"
         required: false
-        default: "DummyValue1"
+        default: "test4"
         type: choice
         options:
-          - DummyValue2
-          - DummyValue1
+          - test4
+          - test2
+          - test
 env:
   GH_TOKEN: ${{ secrets.PAT_GITHUB }}
   ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
