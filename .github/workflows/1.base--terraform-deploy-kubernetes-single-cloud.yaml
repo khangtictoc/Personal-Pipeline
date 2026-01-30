@@ -181,7 +181,7 @@ jobs:
         if: ${{ github.event.inputs.terraform_action == 'destroy' && github.event.inputs.deploy_kubernetes == 'false' }}
         run: |
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION/${{ github.event.inputs.modules }}"
-          terragrunt run --all  --non-interactive apply destroy
+          terragrunt run --all  --non-interactive destroy
 
       - name: Terragrunt Plan Destroy
         if: ${{ github.event.inputs.terraform_action == 'plan-destroy' && github.event.inputs.deploy_kubernetes == 'false' }}
