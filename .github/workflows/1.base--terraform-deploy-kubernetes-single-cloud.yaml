@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
     inputs:
       deploy_kubernetes:
-        description: "Deploy Kubernetes Components"
+        description: "Kubernetes Components"
         required: false
         default: true
         type: boolean
