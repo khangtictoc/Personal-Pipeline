@@ -170,6 +170,12 @@ jobs:
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION/${{ github.event.inputs.modules }}"
           terragrunt run --all  --non-interactive plan -- -destroy
 
+      - name: Kubernetes Components - Terragrunt Destroy (Auto Approve)
+        if: ${{ github.event.inputs.terraform_action == 'destroy' && github.event.inputs.deploy_kubernetes == 'false' }}
+        run: |
+          cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION/${{ github.event.inputs.modules }}"
+          terragrunt run --all  --non-interactive destroy
+
   deploy-k8s-components:
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.deploy_kubernetes == 'true' }}
@@ -198,6 +204,12 @@ jobs:
         run: |
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/kubernetes/${{ github.event.inputs.cloud_provider }}/$REGION"
           terragrunt run --all  --non-interactive plan -- -destroy
+
+      - name: Terragrunt Destroy (Auto Approve)
+        if: ${{ github.event.inputs.terraform_action == 'destroy' }}
+        run: |
+          cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/kubernetes/${{ github.event.inputs.cloud_provider }}/$REGION"
+          terragrunt run --all  --non-interactive destroy
 
   cleanup:
     runs-on: ubuntu-latest
