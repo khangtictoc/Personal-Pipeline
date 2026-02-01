@@ -147,23 +147,8 @@ jobs:
   deploy-cluster-infra:
     runs-on: ubuntu-latest
     steps:
-      - name: Install AWS CLI
-        run: |
-          curl -sS https://raw.githubusercontent.com/khangtictoc/Productive-Workspace-Set-Up/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/aws_cli.sh | bash
-
-      - name: Install Terraform
-        run: |
-          curl -sS https://raw.githubusercontent.com/khangtictoc/Productive-Workspace-Set-Up/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/terraform.sh | bash
-
-      - name: Install Terragrunt CLI
-        run: |
-          curl -sS https://raw.githubusercontent.com/khangtictoc/Productive-Workspace-Set-Up/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/terragrunt.sh | bash
-
-      - name: Checkout Terragrunt Project
-        uses: actions/checkout@v4
-        with:
-          repository: khangtictoc/Terragrunt_Project_Structure_Design
-          path: Terragrunt_Project_Structure_Design
+      - name: Preparation Common
+        uses: ./.github/actions/terragrunt-setup.yaml
 
       - name: Terragrunt Plan
         if: ${{ github.event.inputs.terraform_action == 'plan'  }}
@@ -188,6 +173,9 @@ jobs:
     if: ${{ github.event.inputs.deploy_kubernetes == 'true' }}
     needs: deploy-cluster-infra
     steps:
+      - name: Preparation Common
+        uses: ./.github/actions/terragrunt-setup.yaml
+
       - name: Kubernetes Components - Terragrunt Plan
         if: ${{ github.event.inputs.terraform_action == 'plan' }}
         run: |

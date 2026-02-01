@@ -1,0 +1,22 @@
+name: "Terraform Setup"
+description: "Install Terraform and Terragrunt"
+runs:
+  using: "composite"
+  steps:
+    - name: Install AWS CLI
+      run: |
+        curl -sS https://raw.githubusercontent.com/khangtictoc/Productive-Workspace-Set-Up/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/aws_cli.sh | bash
+
+    - name: Install Terraform
+      run: |
+        curl -sS https://raw.githubusercontent.com/khangtictoc/Productive-Workspace-Set-Up/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/terraform.sh | bash
+
+    - name: Install Terragrunt CLI
+      run: |
+        curl -sS https://raw.githubusercontent.com/khangtictoc/Productive-Workspace-Set-Up/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/terragrunt.sh | bash
+
+    - name: Checkout Terragrunt Project
+      uses: actions/checkout@v4
+      with:
+        repository: khangtictoc/Terragrunt_Project_Structure_Design
+        path: Terragrunt_Project_Structure_Design
