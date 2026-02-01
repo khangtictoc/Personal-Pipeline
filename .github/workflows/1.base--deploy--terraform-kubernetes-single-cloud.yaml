@@ -102,6 +102,7 @@ on:
           - plan
           - apply
           - plan-destroy
+          - destroy
 
 env:
   GH_TOKEN: ${{ secrets.PAT_GITHUB }}
