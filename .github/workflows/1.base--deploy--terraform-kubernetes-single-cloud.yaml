@@ -150,7 +150,7 @@ jobs:
       - name: Checkout Workflow Repository
         uses: actions/checkout@v4
       - name: Preparation Common
-        uses: ./Personal-Pipeline/.github/actions/terragrunt-setup.yaml
+        uses: ./.github/actions/terragrunt-setup
 
       - name: Terragrunt Plan
         if: ${{ github.event.inputs.terraform_action == 'plan'  }}
@@ -179,7 +179,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Preparation Common
-        uses: ./Personal-Pipeline/.github/actions/terragrunt-setup.yaml
+        uses: ./.github/actions/terragrunt-setup
 
       - name: Kubernetes Components - Terragrunt Plan
         if: ${{ github.event.inputs.terraform_action == 'plan' }}
