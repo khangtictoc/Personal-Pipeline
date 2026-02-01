@@ -154,7 +154,7 @@ jobs:
         uses: ./.github/actions/terragrunt-setup
 
       - name: Terragrunt Plan
-        if: ${{ github.event.inputs.terraform_action == 'plan'  }}
+        if: ${{ github.event.inputs.terraform_action == 'plan' && github.event.inputs.deploy_kubernetes == 'false' }}
         run: |
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION/${{ github.event.inputs.modules }}"
           terragrunt run --all  --non-interactive plan
@@ -166,7 +166,7 @@ jobs:
           terragrunt run --all  --non-interactive apply
 
       - name: Terragrunt Plan Destroy
-        if: ${{ github.event.inputs.terraform_action == 'plan-destroy'}}
+        if: ${{ github.event.inputs.terraform_action == 'plan-destroy' && github.event.inputs.deploy_kubernetes == 'false'}}
         run: |
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION/${{ github.event.inputs.modules }}"
           terragrunt run --all  --non-interactive plan -- -destroy
