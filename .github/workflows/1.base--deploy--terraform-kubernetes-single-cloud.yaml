@@ -159,9 +159,11 @@ jobs:
         run: |
           curl -sS https://raw.githubusercontent.com/khangtictoc/Productive-Workspace-Set-Up/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/terragrunt.sh | bash
 
-      - name: Check Out Terragrunt Project
-        run: |
-          git clone --depth 1 https://github.com/khangtictoc/Terragrunt_Project_Structure_Design.git
+      - name: Checkout Terragrunt Project
+        uses: actions/checkout@v4
+        with:
+          repository: khangtictoc/Terragrunt_Project_Structure_Design
+          path: Terragrunt_Project_Structure_Design
 
       - name: Terragrunt Plan
         if: ${{ github.event.inputs.terraform_action == 'plan'  }}
