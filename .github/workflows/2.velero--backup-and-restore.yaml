@@ -1,4 +1,4 @@
-name: "[02] Velero - Backup & Restore"
+name: "[2.0] Velero - Backup & Restore"
 on:
   workflow_dispatch:
     inputs:
