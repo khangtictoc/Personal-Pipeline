@@ -4,14 +4,17 @@ runs:
   using: "composite"
   steps:
     - name: Install AWS CLI
+      shell: bash
       run: |
         curl -sS https://raw.githubusercontent.com/khangtictoc/Productive-Workspace-Set-Up/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/aws_cli.sh | bash
 
     - name: Install Terraform
+      shell: bash
       run: |
         curl -sS https://raw.githubusercontent.com/khangtictoc/Productive-Workspace-Set-Up/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/terraform.sh | bash
 
     - name: Install Terragrunt CLI
+      shell: bash
       run: |
         curl -sS https://raw.githubusercontent.com/khangtictoc/Productive-Workspace-Set-Up/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/terragrunt.sh | bash
 
