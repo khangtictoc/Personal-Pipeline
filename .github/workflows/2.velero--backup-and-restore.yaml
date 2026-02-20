@@ -48,9 +48,10 @@ on:
       restored_version:
         description: "Choose A Version To Restore (First 10 latest)"
         required: false
-        default: "testproject-dev-general-00-2026.02.17-15.24.36"
+        default: "testproject-dev-general-00-2026.02.20-04.22.06"
         type: choice
         options:
+          - testproject-dev-general-00-2026.02.20-04.22.06
           - testproject-dev-general-00-2026.02.17-15.24.36
           - testproject-dev-general-00-2026.02.17-08.20.35
 env:
