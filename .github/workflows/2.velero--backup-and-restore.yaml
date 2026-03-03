@@ -58,6 +58,7 @@ on:
           - testproject-dev-general-00-2026.02.20-04.22.06
           - testproject-dev-general-00-2026.02.17-15.24.36
           - testproject-dev-general-00-2026.02.17-08.20.35
+          - my-backup
 env:
   GH_TOKEN: ${{ secrets.PAT_GITHUB }}
   ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
