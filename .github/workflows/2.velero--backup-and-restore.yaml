@@ -2,6 +2,17 @@ name: "[2.0] Velero - Backup & Restore"
 on:
   workflow_dispatch:
     inputs:
+      type:
+        description: |
+          Choose Your Backup/Restore Type For Your Disk
+          (Volume Snapshot stored in EC2 Snapshot
+          Or File System stored in S3 bucket)
+        required: true
+        default: "filesystem"
+        type: choice
+        options:
+          - filesystem
+          - snapshot
       action:
         description: "Choose Your Action"
         required: true
@@ -108,15 +119,28 @@ jobs:
         if: ${{ github.event.inputs.action != 'reconcile' }}
         run: |
           curl -sS https://raw.githubusercontent.com/khangtictoc/Productive-Workspace-Set-Up/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/velero_cli.sh | bash
-      - name: Velero Fully Backup (Include Volumes)
-        if: ${{ github.event.inputs.action == 'backup' }}
+      - name: "[Snapshot] Velero Fully Backup (Include Volumes)"
+        if: ${{ github.event.inputs.action == 'backup' && github.event.inputs.type == 'snapshot'}}
         run: |
-          chmod +x "script/2.velero--backup-and-restore/backup.sh"
-          ./script/2.velero--backup-and-restore/backup.sh "${{ github.event.inputs.cluster_name }}"
+          chmod +x "script/2.velero--backup-and-restore/backup-snap.sh"
+          ./script/2.velero--backup-and-restore/backup-snap.sh "${{ github.event.inputs.cluster_name }}"
           chmod +x "script/2.velero--backup-and-restore/reconcile.sh"
           ./script/2.velero--backup-and-restore/reconcile.sh $GITHUB_REPOSITORY
-      - name: Velero Restore
+      - name: "[Filesystem] Velero Fully Backup (Include Volumes)"
+        if: ${{ github.event.inputs.action == 'backup' && github.event.inputs.type == 'filesystem'}}
+        run: |
+          chmod +x "script/2.velero--backup-and-restore/backup-fs.sh"
+          ./script/2.velero--backup-and-restore/backup-fs.sh "${{ github.event.inputs.cluster_name }}"
+          sleep 5s
+          chmod +x "script/2.velero--backup-and-restore/reconcile.sh"
+          ./script/2.velero--backup-and-restore/reconcile.sh $GITHUB_REPOSITORY
+      - name: "[Snapshot] Velero Fully Restore"
         if: ${{ github.event.inputs.action == 'restore' }}
         run: |
-          chmod +x "script/2.velero--backup-and-restore/restore.sh"
+          chmod +x "script/2.velero--backup-and-restore/restore-snap.sh"
+          ./script/2.velero--backup-and-restore/restore.sh "${{ github.event.inputs.restored_version }}"
+      - name: "[Filesystem] Velero Fully Restore"
+        if: ${{ github.event.inputs.action == 'restore' }}
+        run: |
+          chmod +x "script/2.velero--backup-and-restore/restore-fs.sh"
           ./script/2.velero--backup-and-restore/restore.sh "${{ github.event.inputs.restored_version }}"
