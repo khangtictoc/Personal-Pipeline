@@ -10,7 +10,7 @@ function main(){
     # Check if restore already exists
     if velero restore get | awk '{print $1}' | grep -q "^${restore_version}$"; then
         echo "${YELLOW}[WARN] Restore '${restore_version}' already exists. Removing old restores${NC}"
-        velero restore delete $restore_version
+        velero restore delete "$restore_version"
     else
         velero restore create "$restore_version" --from-backup "$restore_version" --wait
         echo "${GREEN}[SUCCESS] Restore Completed!${NC}"
