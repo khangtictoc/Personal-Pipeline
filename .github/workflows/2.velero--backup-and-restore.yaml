@@ -135,12 +135,12 @@ jobs:
           chmod +x "script/2.velero--backup-and-restore/reconcile.sh"
           ./script/2.velero--backup-and-restore/reconcile.sh $GITHUB_REPOSITORY
       - name: "[Snapshot] Velero Fully Restore"
-        if: ${{ github.event.inputs.action == 'restore' }}
+        if: ${{ github.event.inputs.action == 'restore' && github.event.inputs.type == 'snapshot' }}
         run: |
           chmod +x "script/2.velero--backup-and-restore/restore-snap.sh"
-          ./script/2.velero--backup-and-restore/restore.sh "${{ github.event.inputs.restored_version }}"
+          ./script/2.velero--backup-and-restore/restore-snap.sh "${{ github.event.inputs.restored_version }}"
       - name: "[Filesystem] Velero Fully Restore"
-        if: ${{ github.event.inputs.action == 'restore' }}
+        if: ${{ github.event.inputs.action == 'restore' && github.event.inputs.type == 'filesystem' }}
         run: |
           chmod +x "script/2.velero--backup-and-restore/restore-fs.sh"
-          ./script/2.velero--backup-and-restore/restore.sh "${{ github.event.inputs.restored_version }}"
+          ./script/2.velero--backup-and-restore/restore-fs.sh "${{ github.event.inputs.restored_version }}"
