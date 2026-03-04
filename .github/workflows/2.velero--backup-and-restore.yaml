@@ -143,4 +143,4 @@ jobs:
         if: ${{ github.event.inputs.action == 'restore' && github.event.inputs.type == 'filesystem' }}
         run: |
           chmod +x "script/2.velero--backup-and-restore/restore-fs.sh"
-          ./script/2.velero--backup-and-restore/restore-fs.sh "${{ github.event.inputs.restored_version }}"
+          ./script/2.velero--backup-and-restore/restore-fs.sh "${{ github.event.inputs.restored_version }} jenkins"

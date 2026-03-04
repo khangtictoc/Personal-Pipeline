@@ -64,13 +64,6 @@ else
 fi
 log_info  "Restore name : $RESTORE_NAME"
 
-echo ""
-read -p "$(echo -e ${YELLOW}Are you sure you want to proceed? [yes/no]:${NC} )" CONFIRM
-if [[ "$CONFIRM" != "yes" ]]; then
-  log_info "Aborted."
-  exit 0
-fi
-
 # ── Delete namespace(s) for clean restore ─────────────────────
 log_step "Preparing Clean State"
 
