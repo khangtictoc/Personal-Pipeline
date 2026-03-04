@@ -6,7 +6,7 @@ function main(){
 
     echo "[INFO] Start fully restore ..."
     restore_version="$1"
-    velero restore create $restore_version --from-backup $restore_version --wait
+    velero restore create $restore_version --from-backup $restore_version --existing-resource-policy=update --wait
     echo "${GREEN}[SUCCESS] Restore Completed!${NC}"
 
     echo "[INFO] Confirm your restorations:"
