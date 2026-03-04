@@ -10,7 +10,7 @@ function main(){
     backup_file="$cluster_name_formatted-$current_time"
 
     echo "[INFO] Start fully backup - ${YELLOW}Cluster: $cluster_name, Recorded at: $current_time ${NC} ..."
-    velero create backup  --include-cluster-scoped-resources="*" --include-namespaces="*" $backup_file
+    velero backup create --default-volumes-to-fs-backup --include-cluster-scoped-resources="*" --include-namespaces="*" $backup_file --wait
     echo "${GREEN}[SUCCESS] Backup Completed!${NC}"
 
     echo "[INFO] Confirm your backups:"
