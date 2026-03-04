@@ -12,6 +12,9 @@ function main(){
     echo "[INFO] Confirm your restorations:"
     velero restore get | grep --color=always "$restore_version"
 
+    echo "[INFO] Review your restorations"
+    velero restore describe $restore_version
+
     echo "[INFO] Monitoring restoring logs"
     velero restore logs $restore_version
 }

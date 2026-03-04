@@ -16,6 +16,9 @@ function main(){
     echo "[INFO] Confirm your backups:"
     velero backup get | grep --color=always "$backup_file"
 
+    echo "[INFO] Review your backup"
+    velero backup describe $backup_file
+
     echo "[INFO] Monitoring restoring logs"
     velero backup logs $backup_file 
 }
