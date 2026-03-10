@@ -114,7 +114,7 @@ jobs:
       - name: Install Velero CLI
         if: ${{ github.event.inputs.action != 'reconcile' }}
         run: |
-          curl -sS https://raw.githubusercontent.com/khangtictoc/Productive-Workspace-Set-Up/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/velero_cli.sh | bash
+          curl -sS https://raw.githubusercontent.com/khangtictoc/DevOps-Tools-Installation-Scripts/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/velero_cli.sh | bash
       - name: "[Snapshot] Velero Fully Backup (Include Volumes)"
         if: ${{ github.event.inputs.action == 'backup' && github.event.inputs.type == 'snapshot'}}
         run: |

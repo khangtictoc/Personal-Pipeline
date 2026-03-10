@@ -6,17 +6,17 @@ runs:
     - name: Install AWS CLI
       shell: bash
       run: |
-        curl -sS https://raw.githubusercontent.com/khangtictoc/Productive-Workspace-Set-Up/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/aws_cli.sh | bash
+        curl -sS https://raw.githubusercontent.com/khangtictoc/DevOps-Tools-Installation-Scripts/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/aws_cli.sh | bash
 
     - name: Install Terraform
       shell: bash
       run: |
-        curl -sS https://raw.githubusercontent.com/khangtictoc/Productive-Workspace-Set-Up/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/terraform.sh | bash
+        curl -sS https://raw.githubusercontent.com/khangtictoc/DevOps-Tools-Installation-Scripts/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/terraform.sh | bash
 
     - name: Install Terragrunt CLI
       shell: bash
       run: |
-        curl -sS https://raw.githubusercontent.com/khangtictoc/Productive-Workspace-Set-Up/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/terragrunt.sh | bash
+        curl -sS https://raw.githubusercontent.com/khangtictoc/DevOps-Tools-Installation-Scripts/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/terragrunt.sh | bash
 
     - name: Checkout Terragrunt Project
       uses: actions/checkout@v4
