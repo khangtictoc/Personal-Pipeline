@@ -199,7 +199,7 @@ jobs:
       - name: Kubernetes Components - Terragrunt Plan
         if: ${{ github.event.inputs.terraform_action == 'plan' }}
         run: |
-          cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/kubernetes/${{ github.event.inputs.cloud_provider }}/$REGION/${{ github.event.inputs.deploy_type }}
+          cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/kubernetes/${{ github.event.inputs.cloud_provider }}/$REGION/${{ github.event.inputs.deploy_type }}"
           terragrunt run --all  --non-interactive plan
 
       - name: Kubernetes Components - Terragrunt Apply (Auto Approve)
