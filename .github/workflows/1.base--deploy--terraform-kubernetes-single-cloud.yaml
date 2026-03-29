@@ -146,6 +146,7 @@ jobs:
 
       - name: Verify Input
         run: |
+          echo "Deploy Type: ${{ github.event.inputs.deploy_type }}"
           echo "Deploy Kubernetes: ${{ github.event.inputs.deploy_kubernetes }}"
           echo "Cloud Provider: ${{ github.event.inputs.cloud_provider }}"
           echo "Module: ${{ github.event.inputs.modules }}"
@@ -200,25 +201,25 @@ jobs:
         if: ${{ github.event.inputs.terraform_action == 'plan' }}
         run: |
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/kubernetes/${{ github.event.inputs.cloud_provider }}/$REGION/${{ github.event.inputs.deploy_type }}"
-          terragrunt run --all  --non-interactive plan
+          terragrunt run --non-interactive plan
 
       - name: Kubernetes Components - Terragrunt Apply (Auto Approve)
         if: ${{ github.event.inputs.terraform_action == 'apply' }}
         run: |
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/kubernetes/${{ github.event.inputs.cloud_provider }}/$REGION/${{ github.event.inputs.deploy_type }}"
-          terragrunt run --all  --non-interactive apply
+          terragrunt run --non-interactive apply
 
       - name: Kubernetes Components - Terragrunt Plan Destroy
         if: ${{ github.event.inputs.terraform_action == 'plan-destroy' }}
         run: |
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/kubernetes/${{ github.event.inputs.cloud_provider }}/$REGION/${{ github.event.inputs.deploy_type }}"
-          terragrunt run --all  --non-interactive plan -- -destroy
+          terragrunt run --non-interactive plan -- -destroy
 
       - name: Terragrunt Destroy (Auto Approve)
         if: ${{ github.event.inputs.terraform_action == 'destroy' }}
         run: |
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/kubernetes/${{ github.event.inputs.cloud_provider }}/$REGION/${{ github.event.inputs.deploy_type }}"
-          terragrunt run --all  --non-interactive destroy
+          terragrunt run --non-interactive destroy
 
   cleanup:
     runs-on: ubuntu-latest
