@@ -206,6 +206,7 @@ jobs:
       - name: Kubernetes Components - Terragrunt Apply (Auto Approve)
         if: ${{ github.event.inputs.terraform_action == 'apply' }}
         run: |
+          set -x
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/kubernetes/${{ github.event.inputs.cloud_provider }}/$REGION/${{ github.event.inputs.deploy_type }}"
           terragrunt run --all --non-interactive apply
 
