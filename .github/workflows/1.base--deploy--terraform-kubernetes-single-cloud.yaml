@@ -30,7 +30,7 @@ on:
       cloud_provider:
         description: "Choose Cloud Provider"
         required: false
-        default: "azure"
+        default: "aws"
         type: choice
         options:
           - azure
