@@ -22,11 +22,19 @@ on:
         options:
           - helm
           - argocd
+
       deploy_kubernetes:
         description: "Kubernetes Components"
         required: false
         default: true
         type: boolean
+
+      deploy_vault_components:
+        description: "Vault Components"
+        required: false
+        default: true
+        type: boolean
+
       cloud_provider:
         description: "Choose Cloud Provider"
         required: false
@@ -38,6 +46,7 @@ on:
           - gcp
           - hcp
           - kubenetes
+
       modules:
         description: "Choose Cloud Modules"
         required: true
@@ -52,6 +61,7 @@ on:
           - gke
           - vault-dedicated-cluster
           - vault-components
+
       region_aws:
         description: "Choose Region for EKS"
         required: false
@@ -71,6 +81,7 @@ on:
           - East US
           - West US 2
           - Japan West
+
       region_hcp:
         description: "Choose Region for HCP"
         required: false
@@ -80,6 +91,7 @@ on:
           - us-east-1
           - us-west-2
           - ap-east-1
+
       region_kubenetes:
         description: "Choose Region for Kubernetes"
         required: false
@@ -92,6 +104,7 @@ on:
           - us-east-1
           - us-west-2
           - ap-east-1
+
       environment:
         description: "Choose Environment"
         required: false
@@ -101,6 +114,7 @@ on:
           - dev
           - prod
           - stg
+
       terraform_action:
         description: "Choose Terraform Action"
         required: false
@@ -185,6 +199,42 @@ jobs:
         run: |
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION/${{ github.event.inputs.modules }}"
           terragrunt run --all  --non-interactive destroy
+
+  deploy-vault-components:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.deploy_vault_components == 'true' }}
+    needs: deploy-cluster-infra
+    steps:
+      - name: Checkout Workflow Repository
+        uses: actions/checkout@v4
+
+      - name: Preparation Common
+        uses: ./.github/actions/terragrunt-setup
+
+      - name: Kubernetes Components - Terragrunt Plan
+        if: ${{ github.event.inputs.terraform_action == 'plan' }}
+        run: |
+          cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/hcp/${{ github.event.inputs.cloud_provider }}/$REGION/vault-components"
+          terragrunt run --non-interactive plan
+
+      - name: Kubernetes Components - Terragrunt Apply (Auto Approve)
+        if: ${{ github.event.inputs.terraform_action == 'apply' }}
+        run: |
+          set -x
+          cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/hcp/${{ github.event.inputs.cloud_provider }}/$REGION/vault-components"
+          terragrunt run --all --non-interactive apply
+
+      - name: Kubernetes Components - Terragrunt Plan Destroy
+        if: ${{ github.event.inputs.terraform_action == 'plan-destroy' }}
+        run: |
+          cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/hcp/${{ github.event.inputs.cloud_provider }}/$REGION/vault-components"
+          terragrunt run --non-interactive plan -- -destroy
+
+      - name: Terragrunt Destroy (Auto Approve)
+        if: ${{ github.event.inputs.terraform_action == 'destroy' }}
+        run: |
+          cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/hcp/${{ github.event.inputs.cloud_provider }}/$REGION/vault-components"
+          terragrunt run --non-interactive destroy
 
   deploy-k8s-components:
     runs-on: ubuntu-latest
