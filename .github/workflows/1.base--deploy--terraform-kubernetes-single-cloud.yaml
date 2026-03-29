@@ -241,7 +241,7 @@ jobs:
   deploy-k8s-components:
     runs-on: ubuntu-latest
     if: ${{ github.event.inputs.deploy_kubernetes == 'true' }}
-    needs: [deploy-cluster-infra, deploy-vault-components]
+    needs: [deploy-cluster-infra]
 
     steps:
       - name: Checkout Workflow Repository
