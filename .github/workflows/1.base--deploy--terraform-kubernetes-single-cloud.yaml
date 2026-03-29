@@ -277,7 +277,8 @@ jobs:
   cleanup:
     runs-on: ubuntu-latest
     if: always()
-    needs: [deploy-cluster-infra, deploy-k8s-components]
+    needs:
+      [deploy-cluster-infra, deploy-k8s-components, deploy-vault-components]
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
