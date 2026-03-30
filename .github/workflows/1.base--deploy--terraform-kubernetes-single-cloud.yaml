@@ -151,6 +151,10 @@ env:
   IS_VAULT_COMPONENTS_SCOPE: ${{ github.event.inputs.deploy_vault_components == 'true' || github.event.inputs.deploy_kubernetes == 'true'}}
   IS_KUBERNETES_SCOPE: ${{ github.event.inputs.deploy_kubernetes == 'true' }}
 
+  IS_CLUSTER_DESTROY_SCOPE: ${{ github.event.inputs.deploy_kubernetes == 'false' && github.event.inputs.deploy_vault_components == 'false' }}
+  IS_VAULT_COMPONENTS_DESTROY_SCOPE: ${{ github.event.inputs.deploy_vault_components == 'true' && github.event.inputs.deploy_kubernetes == 'false' }}
+  IS_KUBERNETES_DESTROY_SCOPE: ${{ github.event.inputs.deploy_kubernetes == 'true' }}
+
 jobs:
   verify-configuration:
     runs-on: ubuntu-latest
@@ -203,13 +207,13 @@ jobs:
           terragrunt run --all  --non-interactive apply
 
       - name: Terragrunt Plan Destroy
-        if: env.IS_PLAN_DESTROY == 'true' && env.IS_CLUSTER_SCOPE == 'true'
+        if: env.IS_PLAN_DESTROY == 'true' && env.IS_CLUSTER_DESTROY_SCOPE == 'true'
         run: |
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION/${{ github.event.inputs.modules }}"
           terragrunt run --all  --non-interactive plan -- -destroy
 
       - name: Kubernetes Components - Terragrunt Destroy (Auto Approve)
-        if: env.IS_DESTROY == 'true' && env.IS_CLUSTER_SCOPE == 'true'
+        if: env.IS_DESTROY == 'true' && env.IS_CLUSTER_DESTROY_SCOPE == 'true'
         run: |
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/${{ github.event.inputs.cloud_provider }}/$REGION/${{ github.event.inputs.modules }}"
           terragrunt run --all  --non-interactive destroy
@@ -239,13 +243,13 @@ jobs:
           terragrunt run --all --non-interactive apply
 
       - name: Vault Components - Terragrunt Plan Destroy
-        if: env.IS_PLAN_DESTROY == 'true' && env.IS_VAULT_COMPONENTS_SCOPE == 'true'
+        if: env.IS_PLAN_DESTROY == 'true' && env.IS_VAULT_COMPONENTS_DESTROY_SCOPE == 'true'
         run: |
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/hcp/${{ github.event.inputs.cloud_provider }}/$REGION/vault-components"
           terragrunt run --non-interactive plan -- -destroy
 
       - name: Vault Components - Terragrunt Destroy (Auto Approve)
-        if: env.IS_DESTROY == 'true' && env.IS_VAULT_COMPONENTS_SCOPE == 'true'
+        if: env.IS_DESTROY == 'true' && env.IS_VAULT_COMPONENTS_DESTROY_SCOPE == 'true'
         run: |
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/hcp/${{ github.event.inputs.cloud_provider }}/$REGION/vault-components"
           terragrunt run --non-interactive destroy
@@ -276,13 +280,13 @@ jobs:
           terragrunt run --all --non-interactive apply
 
       - name: Kubernetes Components - Terragrunt Plan Destroy
-        if: env.IS_PLAN_DESTROY == 'true' && env.IS_KUBERNETES_SCOPE == 'true'
+        if: env.IS_PLAN_DESTROY == 'true' && env.IS_KUBERNETES_DESTROY_SCOPE == 'true'
         run: |
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/kubernetes/${{ github.event.inputs.cloud_provider }}/$REGION/${{ github.event.inputs.deploy_type }}"
           terragrunt run --non-interactive plan -- -destroy
 
       - name: Terragrunt Destroy (Auto Approve)
-        if: env.IS_DESTROY == 'true' && env.IS_KUBERNETES_SCOPE == 'true'
+        if: env.IS_DESTROY == 'true' && env.IS_KUBERNETES_DESTROY_SCOPE == 'true'
         run: |
           cd "Terragrunt_Project_Structure_Design/environment/${{ github.event.inputs.environment }}/kubernetes/${{ github.event.inputs.cloud_provider }}/$REGION/${{ github.event.inputs.deploy_type }}"
           terragrunt run --non-interactive destroy
