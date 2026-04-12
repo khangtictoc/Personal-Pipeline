@@ -50,7 +50,7 @@ on:
       modules:
         description: "Choose Cloud Modules"
         required: true
-        default: "aks"
+        default: "eks"
         type: choice
         options:
           - eks
