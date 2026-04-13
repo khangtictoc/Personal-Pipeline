@@ -9,12 +9,6 @@ on:
         default: "backup"
         type: choice
         options: [backup, restore, reconcile]
-      type:
-        description: "Storage Type"
-        required: true
-        default: "filesystem"
-        type: choice
-        options: [filesystem, snapshot]
       cluster_name:
         description: "Cluster Name"
         required: false
@@ -26,25 +20,57 @@ on:
         type: choice
         options: [testproject-dev-general-00-2026.03.04-12.14.23]
 
-      # --- NAMESPACE SELECTION ---
-      inc_jenkins:
+      # --- NAMESPACE SELECTION (BOOLEANS) ---
+      backup_jenkins:
         description: "jenkins"
         type: boolean
         default: true
-      inc_mongodb:
+      backup_mongodb:
         description: "mongodb"
         type: boolean
         default: false
-      inc_postgresql:
+      backup_mongodb_sharded:
+        description: "mongodb-sharded"
+        type: boolean
+        default: false
+      backup_postgresql:
         description: "postgresql"
         type: boolean
         default: false
-      inc_argocd:
+      backup_argocd:
         description: "argocd"
         type: boolean
         default: false
-      inc_grafana_loki:
+      backup_argocd_apps:
+        description: "argocd-apps"
+        type: boolean
+        default: false
+      backup_vault:
+        description: "hcp-vault"
+        type: boolean
+        default: false
+      backup_grafana_loki:
         description: "grafana-loki"
+        type: boolean
+        default: false
+      backup_grafana_mimir:
+        description: "grafana-mimir"
+        type: boolean
+        default: false
+      backup_grafana_tempo:
+        description: "grafana-tempo"
+        type: boolean
+        default: false
+      backup_cert_manager:
+        description: "cert-manager"
+        type: boolean
+        default: false
+      backup_nginx_ingress:
+        description: "nginx-ingress"
+        type: boolean
+        default: false
+      backup_testing:
+        description: "testing"
         type: boolean
         default: false
 
@@ -71,12 +97,10 @@ jobs:
           persist-credentials: false
 
       - name: Initialize Workspace Permissions
-        id: init
         run: |
           echo "Preparing executable permissions for scripts in $BASE_PATH..."
           if [ -d "$BASE_PATH" ]; then
             find "$BASE_PATH" -name "*.sh" -exec chmod +x {} +
-            echo "Success: Scripts are now executable."
           else
             echo "Error: Directory $BASE_PATH not found."
             exit 1
@@ -95,16 +119,24 @@ jobs:
         if: github.event.inputs.action == 'backup'
         run: |
           NS=""
-          [[ "${{ github.event.inputs.inc_jenkins }}" == "true" ]] && NS+="jenkins,"
-          [[ "${{ github.event.inputs.inc_mongodb }}" == "true" ]] && NS+="mongodb,"
-          [[ "${{ github.event.inputs.inc_postgresql }}" == "true" ]] && NS+="postgresql,"
-          [[ "${{ github.event.inputs.inc_argocd }}" == "true" ]] && NS+="argocd,"
-          [[ "${{ github.event.inputs.inc_grafana_loki }}" == "true" ]] && NS+="grafana-loki,"
+          [[ "${{ github.event.inputs.backup_jenkins }}" == "true" ]] && NS+="jenkins,"
+          [[ "${{ github.event.inputs.backup_mongodb }}" == "true" ]] && NS+="mongodb,"
+          [[ "${{ github.event.inputs.backup_mongodb_sharded }}" == "true" ]] && NS+="mongodb-sharded,"
+          [[ "${{ github.event.inputs.backup_postgresql }}" == "true" ]] && NS+="postgresql,"
+          [[ "${{ github.event.inputs.backup_argocd }}" == "true" ]] && NS+="argocd,"
+          [[ "${{ github.event.inputs.backup_argocd_apps }}" == "true" ]] && NS+="argocd-apps,"
+          [[ "${{ github.event.inputs.backup_vault }}" == "true" ]] && NS+="hcp-vault,"
+          [[ "${{ github.event.inputs.backup_grafana_loki }}" == "true" ]] && NS+="grafana-loki,"
+          [[ "${{ github.event.inputs.backup_grafana_mimir }}" == "true" ]] && NS+="grafana-mimir,"
+          [[ "${{ github.event.inputs.backup_grafana_tempo }}" == "true" ]] && NS+="grafana-tempo,"
+          [[ "${{ github.event.inputs.backup_cert_manager }}" == "true" ]] && NS+="cert-manager,"
+          [[ "${{ github.event.inputs.backup_nginx_ingress }}" == "true" ]] && NS+="nginx-ingress,"
+          [[ "${{ github.event.inputs.backup_testing }}" == "true" ]] && NS+="testing,"
 
           NS_FINAL=$(echo $NS | sed 's/,$//')
 
           if [ -z "$NS_FINAL" ]; then
-            echo "Error: You must select at least one namespace for backup."
+            echo "Error: No namespaces selected for backup."
             exit 1
           fi
           echo "SELECTED_NS=$NS_FINAL" >> $GITHUB_ENV
@@ -112,12 +144,12 @@ jobs:
       - name: "Action: Run Backup"
         if: github.event.inputs.action == 'backup'
         run: |
-          ./$BACKUP_SH "${{ github.event.inputs.cluster_name }}" "$SELECTED_NS" "${{ github.event.inputs.type }}"
+          ./$BACKUP_SH "${{ github.event.inputs.cluster_name }}" "$SELECTED_NS"
           ./$RECONCILE_SH $GITHUB_REPOSITORY
 
       - name: "Action: Run Restore"
         if: github.event.inputs.action == 'restore'
-        run: ./$RESTORE_SH "${{ github.event.inputs.restored_version }}" "${{ github.event.inputs.type }}"
+        run: ./$RESTORE_SH "${{ github.event.inputs.restored_version }}"
 
       - name: "Action: Run Reconcile"
         if: github.event.inputs.action == 'reconcile'
