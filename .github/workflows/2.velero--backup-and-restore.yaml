@@ -1,142 +1,124 @@
 name: "[2.0] Velero - Backup & Restore"
+
 on:
   workflow_dispatch:
     inputs:
-      type:
-        description: |
-          Choose Your Backup/Restore Type For Your Disk
-          (Volume Snapshot stored in EC2 Snapshot
-          Or File System stored in S3 bucket)
-        required: true
-        default: "filesystem"
-        type: choice
-        options:
-          - filesystem
-          - snapshot
       action:
-        description: "Choose Your Action"
+        description: "Action"
         required: true
         default: "backup"
         type: choice
-        options:
-          - backup
-          - restore
-          - reconcile
-      cloud_provider:
-        description: "Choose Cloud Provider"
-        required: false
-        default: "aws"
+        options: [backup, restore, reconcile]
+      type:
+        description: "Storage Type"
+        required: true
+        default: "filesystem"
         type: choice
-        options:
-          - azure
-          - aws
-          - gcp
-      region_aws:
-        description: "Choose Region for EKS"
-        required: false
-        default: "us-east-1"
-        type: choice
-        options:
-          - us-east-1
-          - us-west-2
-          - ap-east-1
-      region_azure:
-        description: "Choose Region for AKS"
-        required: false
-        default: "Japan West"
-        type: choice
-        options:
-          - East US
-          - West US 2
-          - Japan West
+        options: [filesystem, snapshot]
       cluster_name:
-        description: "Pick A Cluster Name"
+        description: "Cluster Name"
         required: false
-        default: "TESTPROJECT-DEV-GENERAL-00"
         type: choice
-        options:
-          - TESTPROJECT-DEV-GENERAL-00
+        options: [TESTPROJECT-DEV-GENERAL-00]
       restored_version:
-        description: "Choose A Version To Restore (First 10 latest)"
+        description: "Version to Restore"
         required: false
-        default: "testproject-dev-general-00-2026.03.04-12.14.23"
         type: choice
-        options:
-          - testproject-dev-general-00-2026.03.04-12.14.23
-          - testproject-dev-general-00-2026.02.17-15.24.36
-          - testproject-dev-general-00-2026.02.17-08.20.35
-          - my-backup
+        options: [testproject-dev-general-00-2026.03.04-12.14.23]
+
+      # --- NAMESPACE SELECTION ---
+      inc_jenkins:
+        description: "jenkins"
+        type: boolean
+        default: true
+      inc_mongodb:
+        description: "mongodb"
+        type: boolean
+        default: false
+      inc_postgresql:
+        description: "postgresql"
+        type: boolean
+        default: false
+      inc_argocd:
+        description: "argocd"
+        type: boolean
+        default: false
+      inc_grafana_loki:
+        description: "grafana-loki"
+        type: boolean
+        default: false
+
 env:
+  # Path Management
+  BASE_PATH: "script/2.velero--backup-and-restore"
+  BACKUP_SH: "script/2.velero--backup-and-restore/backup.sh"
+  RESTORE_SH: "script/2.velero--backup-and-restore/restore.sh"
+  RECONCILE_SH: "script/2.velero--backup-and-restore/reconcile.sh"
+
+  # Credentials & Context
   GH_TOKEN: ${{ secrets.PAT_GITHUB }}
-  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-  ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  REGION: ${{ github.event.inputs.cloud_provider == 'aws' && github.event.inputs.region_aws || github.event.inputs.cloud_provider == 'azure' && github.event.inputs.region_azure }}
+  REGION: "us-east-1"
+
 jobs:
-  verify-configuration:
+  velero-task:
     runs-on: ubuntu-latest
     steps:
-      - name: Verify Secret
-        run: |
-          echo "GITHUB_PAT_TOKEN: ${GH_TOKEN:0:4}****"
-          echo "ARM_TENANT_ID: ${ARM_TENANT_ID:0:4}****"
-          echo "ARM_SUBSCRIPTION_ID: ${ARM_SUBSCRIPTION_ID:0:4}****"
-          echo "ARM_CLIENT_ID: ${ARM_CLIENT_ID:0:4}****"
-          echo "ARM_CLIENT_SECRET: ${ARM_CLIENT_SECRET:0:4}****"
-          echo "AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:0:4}****"
-          echo "AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:0:4}****"
-          echo "HCP_CLIENT_ID: ${HCP_CLIENT_ID:0:4}****"
-          echo "HCP_CLIENT_SECRET: ${HCP_CLIENT_SECRET:0:4}****"
-      - name: Verify Input
-        run: |
-          echo "Action: ${{ github.event.inputs.action }}"
-          echo "Cloud Provider: ${{ github.event.inputs.cloud_provider }}"
-          echo "Region: $REGION"
-  backup-restore-k8s-cloud-cluster:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v5
         with:
           persist-credentials: false
-      - name: Access Cluster with $KUBECONFIG
-        if: ${{ github.event.inputs.action != 'reconcile' }}
+
+      - name: Initialize Workspace Permissions
+        id: init
         run: |
-          aws eks update-kubeconfig --name ${{ github.event.inputs.cluster_name }}  --region $REGION
-      - name: Reconcile to Update the Cluster Name
-        if: ${{ github.event.inputs.action == 'reconcile' }}
-        run: |
-          chmod +x "script/2.velero--backup-and-restore/reconcile.sh"
-          ./script/2.velero--backup-and-restore/reconcile.sh $GITHUB_REPOSITORY
+          echo "Preparing executable permissions for scripts in $BASE_PATH..."
+          if [ -d "$BASE_PATH" ]; then
+            find "$BASE_PATH" -name "*.sh" -exec chmod +x {} +
+            echo "Success: Scripts are now executable."
+          else
+            echo "Error: Directory $BASE_PATH not found."
+            exit 1
+          fi
+
+      - name: Cloud Authentication
+        if: github.event.inputs.action != 'reconcile'
+        run: aws eks update-kubeconfig --name ${{ github.event.inputs.cluster_name }} --region $REGION
+
       - name: Install Velero CLI
-        if: ${{ github.event.inputs.action != 'reconcile' }}
+        if: github.event.inputs.action != 'reconcile'
         run: |
           curl -sS https://raw.githubusercontent.com/khangtictoc/DevOps-Tools-Installation-Scripts/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/velero_cli.sh | bash
-      - name: "[Snapshot] Velero Fully Backup (Include Volumes)"
-        if: ${{ github.event.inputs.action == 'backup' && github.event.inputs.type == 'snapshot'}}
+
+      - name: "Logic: Build Namespace List"
+        if: github.event.inputs.action == 'backup'
         run: |
-          chmod +x "script/2.velero--backup-and-restore/backup-snap.sh"
-          ./script/2.velero--backup-and-restore/backup-snap.sh "${{ github.event.inputs.cluster_name }}"
-          chmod +x "script/2.velero--backup-and-restore/reconcile.sh"
-          ./script/2.velero--backup-and-restore/reconcile.sh $GITHUB_REPOSITORY
-      - name: "[Filesystem] Velero Fully Backup (Include Volumes)"
-        if: ${{ github.event.inputs.action == 'backup' && github.event.inputs.type == 'filesystem'}}
+          NS=""
+          [[ "${{ github.event.inputs.inc_jenkins }}" == "true" ]] && NS+="jenkins,"
+          [[ "${{ github.event.inputs.inc_mongodb }}" == "true" ]] && NS+="mongodb,"
+          [[ "${{ github.event.inputs.inc_postgresql }}" == "true" ]] && NS+="postgresql,"
+          [[ "${{ github.event.inputs.inc_argocd }}" == "true" ]] && NS+="argocd,"
+          [[ "${{ github.event.inputs.inc_grafana_loki }}" == "true" ]] && NS+="grafana-loki,"
+
+          NS_FINAL=$(echo $NS | sed 's/,$//')
+
+          if [ -z "$NS_FINAL" ]; then
+            echo "Error: You must select at least one namespace for backup."
+            exit 1
+          fi
+          echo "SELECTED_NS=$NS_FINAL" >> $GITHUB_ENV
+
+      - name: "Action: Run Backup"
+        if: github.event.inputs.action == 'backup'
         run: |
-          chmod +x "script/2.velero--backup-and-restore/backup-fs.sh"
-          ./script/2.velero--backup-and-restore/backup-fs.sh "${{ github.event.inputs.cluster_name }}"
-          sleep 5s
-          chmod +x "script/2.velero--backup-and-restore/reconcile.sh"
-          ./script/2.velero--backup-and-restore/reconcile.sh $GITHUB_REPOSITORY
-      - name: "[Snapshot] Velero Fully Restore"
-        if: ${{ github.event.inputs.action == 'restore' && github.event.inputs.type == 'snapshot' }}
-        run: |
-          chmod +x "script/2.velero--backup-and-restore/restore-snap.sh"
-          ./script/2.velero--backup-and-restore/restore-snap.sh "${{ github.event.inputs.restored_version }}"
-      - name: "[Filesystem] Velero Fully Restore"
-        if: ${{ github.event.inputs.action == 'restore' && github.event.inputs.type == 'filesystem' }}
-        run: |
-          chmod +x "script/2.velero--backup-and-restore/restore-fs.sh"
-          ./script/2.velero--backup-and-restore/restore-fs.sh "${{ github.event.inputs.restored_version }}" jenkins
+          ./$BACKUP_SH "${{ github.event.inputs.cluster_name }}" "$SELECTED_NS" "${{ github.event.inputs.type }}"
+          ./$RECONCILE_SH $GITHUB_REPOSITORY
+
+      - name: "Action: Run Restore"
+        if: github.event.inputs.action == 'restore'
+        run: ./$RESTORE_SH "${{ github.event.inputs.restored_version }}" "${{ github.event.inputs.type }}"
+
+      - name: "Action: Run Reconcile"
+        if: github.event.inputs.action == 'reconcile'
+        run: ./$RECONCILE_SH $GITHUB_REPOSITORY
