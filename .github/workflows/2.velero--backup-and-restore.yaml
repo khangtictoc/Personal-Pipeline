@@ -136,11 +136,9 @@ jobs:
           fi
 
       - name: Cloud Authentication
-        if: github.event.inputs.action != 'reconcile'
         run: aws eks update-kubeconfig --name ${{ github.event.inputs.cluster_name }} --region $REGION
 
       - name: Install Velero CLI
-        if: github.event.inputs.action != 'reconcile'
         run: |
           curl -sS https://raw.githubusercontent.com/khangtictoc/DevOps-Tools-Installation-Scripts/refs/heads/main/linux/installation/developer-packages/ubuntu/tools/velero_cli.sh | bash
 
