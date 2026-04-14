@@ -11,20 +11,24 @@ GITHUB_REPOSITORY=$1
 PAGER_SIZE=10
 
 function reconcile-backup-versions(){
-    log_info "Fetching latest $PAGER_SIZE completed backups from Velero..."
+    log_info "Fetching latest 10 completed backups from Velero..."
 
-    # Unified Velero CLI call: ignores provider specifics, focuses on status
-    versions=$(velero backup get \
-        --sort-column "start time" \
-        -o jsonpath='{range .items[?(@.status.phase=="Completed")]}{.metadata.name}{"\n"}{end}' \
-        | tac | head -n "$PAGER_SIZE")
+    # Use JSON output and jq to sort by 'startTimestamp' descending
+    # This avoids the unsupported --sort-column flag entirely
+    versions=$(velero backup get -o json | jq -r '
+        .items 
+        | map(select(.status.phase == "Completed")) 
+        | sort_by(.status.startTimestamp) 
+        | reverse 
+        | .[:10] 
+        | .[].metadata.name' 2>/dev/null)
 
     if [ -z "$versions" ]; then
         log_error "No 'Completed' backups found in the Velero registry."
         exit 1
     fi
 
-    # The most recent successful backup becomes the default
+    # The first one in the reversed list is the most recent
     default_version=$(echo "$versions" | head -n1)
 
     log_info "Synchronizing workflow dispatch inputs in YAML..."
@@ -39,7 +43,7 @@ function reconcile-backup-versions(){
         yq -i ".on.workflow_dispatch.inputs.restored_version.options += [\"$v\"]" "$YAML_FILE"
     done
 
-    log_success "Successfully synced $PAGER_SIZE latest backup records to $YAML_FILE"
+    log_success "Successfully synced 10 latest backup records to $YAML_FILE"
 }
 
 function reconcile-cluster-names(){
