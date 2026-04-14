@@ -47,6 +47,9 @@ on:
         required: false
         type: choice
         options:
+          - testproject-dev-general-00-2026.04.14-06.03.47
+          - testproject-dev-general-00-2026.04.14-05.36.09
+          - testproject-dev-general-00-2026.04.14-05.32.09
           - jenkins-data-only6
           - jenkins-data-only5
           - jenkins-data-only4
@@ -54,10 +57,7 @@ on:
           - jenkins-data-only2
           - jenkins-data-only
           - cluster-pv-only
-          - jenkins-only-pv
-          - jenkins-full-backup
-          - jenkins-pvc-backup
-        default: jenkins-data-only6
+        default: testproject-dev-general-00-2026.04.14-06.03.47
       # --- NAMESPACE SELECTION (BOOLEANS) ---
       backup_jenkins:
         description: "jenkins"
