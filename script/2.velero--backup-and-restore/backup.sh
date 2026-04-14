@@ -57,7 +57,7 @@ log_highlight "VERIFICATION PHASE"
 log_highlight "--------------------------------------------------------"
 
 # Check Phase
-BACKUP_STATUS=$(velero backup get "$BACKUP_NAME" -o json | jq -r '.items[0].status.phase')
+BACKUP_STATUS=$(velero backup get "$BACKUP_NAME" -o json | jq -r '.status.phase')
 
 if [ "$BACKUP_STATUS" == "Completed" ]; then
     log_success "Backup '$BACKUP_NAME' completed successfully!"
