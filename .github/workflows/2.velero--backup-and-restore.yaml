@@ -1,5 +1,9 @@
 name: "[2.0] Velero - Backup & Restore"
 
+run-name: >
+  [Velero] ${{ github.event.inputs.action }} 
+  on ${{ github.event.inputs.cluster_name }} (${{ github.event.inputs.cloud_provider }}/${{ github.event.inputs.region }})
+
 on:
   workflow_dispatch:
     inputs:
@@ -131,15 +135,14 @@ jobs:
       - name: "Audit: Selection Summary"
         run: |
           echo "Action: ${{ github.event.inputs.action }}"
-          echo "Storage Type: ${{ github.event.inputs.type }}"
           echo "Cluster: ${{ github.event.inputs.cluster_name }}"
           echo "----------------------------------------"
           echo "Namespace Toggles:"
-          echo " - Jenkins:    ${{ github.event.inputs.enable_jenkins }}"
-          echo " - MongoDB:    ${{ github.event.inputs.enable_mongodb }}"
-          echo " - PostgreSQL: ${{ github.event.inputs.enable_postgresql }}"
-          echo " - ArgoCD:     ${{ github.event.inputs.enable_argocd }}"
-          echo " - Vault:      ${{ github.event.inputs.enable_vault }}"
+          echo " - Jenkins:    ${{ github.event.inputs.backup_jenkins }}"
+          echo " - MongoDB:    ${{ github.event.inputs.backup_mongodb }}"
+          echo " - PostgreSQL: ${{ github.event.inputs.backup_postgresql }}"
+          echo " - ArgoCD:     ${{ github.event.inputs.backup_argocd }}"
+          echo " - Vault:      ${{ github.event.inputs.backup_vault }}"
   velero-task:
     runs-on: ubuntu-latest
     steps:
