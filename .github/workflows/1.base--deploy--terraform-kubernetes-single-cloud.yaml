@@ -8,10 +8,10 @@ run-name: >
     github.event.inputs.cloud_provider == 'azure' && github.event.inputs.region_azure || 
     github.event.inputs.cloud_provider == 'hcp' && github.event.inputs.region_hcp || 
     github.event.inputs.region_kubenetes 
-  }}) - 
-  Using: ${{ github.event.inputs.deploy_type }} 
-  Deployed OSS: ${{ github.event.inputs.deploy_kubernetes }} 
-  Deploy Vault: ${{ github.event.inputs.deploy_vault_components }}
+  }}) 
+  - Using: ${{ github.event.inputs.deploy_type }} 
+  - Deployed OSS: ${{ github.event.inputs.deploy_kubernetes }} 
+  - Deploy Vault: ${{ github.event.inputs.deploy_vault_components }}
 
 on:
   # push:
