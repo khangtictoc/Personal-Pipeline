@@ -104,7 +104,9 @@ on:
         default: false
 
 env:
-  # Path Management
+  # General config
+  SECRET_MASK_LEN: 4
+
   BASE_PATH: "script/2.velero--backup-and-restore"
   BACKUP_SH: "script/2.velero--backup-and-restore/backup.sh"
   RESTORE_SH: "script/2.velero--backup-and-restore/restore.sh"
@@ -117,6 +119,27 @@ env:
   REGION: ${{ github.event.inputs.region }}
 
 jobs:
+  verify-inputs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Audit: Secret Presence"
+        run: |
+          echo "GITHUB_PAT_TOKEN: ${GH_TOKEN:0:${SECRET_MASK_LEN}}****"
+          echo "AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:0:${SECRET_MASK_LEN}}****"
+          echo "AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:0:${SECRET_MASK_LEN}}****"
+
+      - name: "Audit: Selection Summary"
+        run: |
+          echo "Action: ${{ github.event.inputs.action }}"
+          echo "Storage Type: ${{ github.event.inputs.type }}"
+          echo "Cluster: ${{ github.event.inputs.cluster_name }}"
+          echo "----------------------------------------"
+          echo "Namespace Toggles:"
+          echo " - Jenkins:    ${{ github.event.inputs.enable_jenkins }}"
+          echo " - MongoDB:    ${{ github.event.inputs.enable_mongodb }}"
+          echo " - PostgreSQL: ${{ github.event.inputs.enable_postgresql }}"
+          echo " - ArgoCD:     ${{ github.event.inputs.enable_argocd }}"
+          echo " - Vault:      ${{ github.event.inputs.enable_vault }}"
   velero-task:
     runs-on: ubuntu-latest
     steps:
