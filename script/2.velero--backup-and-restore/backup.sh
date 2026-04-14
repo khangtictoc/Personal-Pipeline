@@ -5,6 +5,14 @@
 # Usage: ./backup.sh <cluster_name> <namespaces_list>
 # ==============================================================================
 
+# 0. Define function
+
+function remove-backup(){
+    local backup_name=$1
+    log_info "Removing Failed/PartiallyFailed or containing errors Backup '$backup_name'..."
+    velero backup delete "$backup_name" --wait
+}
+
 # 1. Source remote utility and initialize colors
 # We use a subshell to ensure sourcing happens before any logging
 source <(curl -sS https://raw.githubusercontent.com/khangtictoc/Productive-Workspace-Set-Up/refs/heads/main/linux/utility/library/bash/ansi_color.sh)
@@ -63,8 +71,10 @@ if [ "$BACKUP_STATUS" == "Completed" ]; then
     log_success "Backup '$BACKUP_NAME' completed successfully!"
 elif [ "$BACKUP_STATUS" == "PartiallyFailed" ]; then
     log_warn "Backup '$BACKUP_NAME' finished with status: PartiallyFailed. Check details below."
+    remove-backup "$BACKUP_NAME"
 else
     log_error "Backup '$BACKUP_NAME' failed with status: $BACKUP_STATUS"
+    remove-backup "$BACKUP_NAME"
     exit 1
 fi
 
@@ -76,6 +86,7 @@ kubectl get podvolumebackups -n velero -l velero.io/backup-name="$BACKUP_NAME"
 ERRORS=$(velero backup logs "$BACKUP_NAME" | grep -i "error" || true)
 if [ -n "$ERRORS" ]; then
     log_error "Anomalies found in Velero logs:"
+    remove-backup "$BACKUP_NAME"
     echo "$ERRORS"
 else
     log_success "No errors found in backup logs."
