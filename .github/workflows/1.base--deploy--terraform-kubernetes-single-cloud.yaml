@@ -1,7 +1,7 @@
 name: "[1.0] Terraform - Deploy Kubernetes Single Cloud"
 
 run-name: >
-  [All-in-ones] ${{ github.event.inputs.terraform_action }} 
+  [All-In-One] ${{ github.event.inputs.terraform_action }} 
   (${{ github.event.inputs.cloud_provider }}/
   ${{ 
     github.event.inputs.cloud_provider == 'aws' && github.event.inputs.region_aws || 
