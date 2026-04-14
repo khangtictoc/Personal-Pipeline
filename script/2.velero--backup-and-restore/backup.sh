@@ -33,9 +33,9 @@ CLUSTER_NAME_FORMATTED=$(echo "$CLUSTER_NAME" | tr '[:upper:]' '[:lower:]' | tr 
 BACKUP_NAME="$CLUSTER_NAME_FORMATTED-$CURRENT_TIME"
 
 log_highlight "--------------------------------------------------------"
-log_info "Initiating backup for cluster: $CLUSTER_NAME"
-log_info "Target Backup Name: $BACKUP_NAME"
-log_info "Namespaces: $NAMESPACES"
+log_highlight "Initiating backup for cluster: $CLUSTER_NAME"
+log_highlight "Target Backup Name: $BACKUP_NAME"
+log_highlight "Namespaces: $NAMESPACES"
 log_highlight "--------------------------------------------------------"
 
 # 4. Check if backup name already exists
@@ -53,11 +53,11 @@ velero backup create "$BACKUP_NAME" \
 
 # 6. Verification
 log_highlight "--------------------------------------------------------"
-log_info "VERIFICATION PHASE"
+log_highlight "VERIFICATION PHASE"
 log_highlight "--------------------------------------------------------"
 
 # Check Phase
-BACKUP_STATUS=$(velero backup get "$BACKUP_NAME" -o jsonpath='{.status.phase}')
+BACKUP_STATUS=$(velero backup get "$BACKUP_NAME" -o json | jq -r '.items[0].status.phase')
 
 if [ "$BACKUP_STATUS" == "Completed" ]; then
     log_success "Backup '$BACKUP_NAME' completed successfully!"
