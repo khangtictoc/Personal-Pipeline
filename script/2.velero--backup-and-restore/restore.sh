@@ -24,7 +24,7 @@ function execute-restore(){
 
     # 1. Pre-flight Validation
     log_info "Status: Validating backup registry record..."
-    local backup_phase=$(velero backup get "$backup_name" -o jsonpath='{.status.phase}' 2>/dev/null)
+    local backup_phase=$(velero backup get "$backup_name" -o json | jq -r '.status.phase' 2>/dev/null)
 
     if [[ -z "$backup_phase" ]]; then
         log_error "Backup '$backup_name' not found. Ensure the record exists in the current cluster context."
