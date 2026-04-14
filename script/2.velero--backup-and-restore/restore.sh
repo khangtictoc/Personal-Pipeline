@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # ==============================================================================
-# Velero Restore Engine
+# Velero Restore Engine (with Pre-Restore Cleanup)
 # Usage: ./restore.sh <backup_name>
 # ==============================================================================
 
@@ -14,38 +14,65 @@ function draw_header() {
 
 function execute-restore(){
     local backup_name=$1
-    # Appending timestamp ensures uniqueness; Velero won't allow duplicate restore names.
     local restore_name="restore-${backup_name}-$(date +%s)"
 
     draw_header "VELERO RESTORE INITIATED"
     log_info "Target Backup:  $backup_name"
     log_info "Restore ID:     $restore_name"
-    echo ""
 
-    # 1. Pre-flight Validation
-    log_info "Status: Validating backup registry record..."
-    local backup_phase=$(velero backup get "$backup_name" -o json | jq -r '.status.phase' 2>/dev/null)
-
-    if [[ -z "$backup_phase" ]]; then
-        log_error "Backup '$backup_name' not found. Ensure the record exists in the current cluster context."
+    # 1. Pre-flight Validation & Metadata Extraction
+    log_info "Status: Validating backup and extracting namespaces..."
+    local backup_json=$(velero backup get "$backup_name" -o json 2>/dev/null)
+    
+    if [[ -z "$backup_json" ]]; then
+        log_error "Backup '$backup_name' not found."
         exit 1
     fi
 
+    local backup_phase=$(echo "$backup_json" | jq -r '.status.phase')
     if [[ "$backup_phase" != "Completed" ]]; then
-        log_warn "Warning: The source backup status is '$backup_phase'. Proceeding with caution."
+        log_warn "Warning: Source backup status is '$backup_phase'. Proceeding with caution."
     fi
 
-    # 2. Execution
+    # Extract namespaces from the backup spec
+    local namespaces=$(echo "$backup_json" | jq -r '.spec.includedNamespaces[]' 2>/dev/null)
+
+    # 2. Cleanup Phase (Crucial for Clean Restore)
+    if [[ ! -z "$namespaces" ]]; then
+        echo ""
+        draw_header "PRE-RESTORE CLEANUP"
+        for ns in $namespaces; do
+            if kubectl get namespace "$ns" >/dev/null 2>&1; then
+                log_warn "Action: Deleting existing namespace '$ns' to prevent conflicts..."
+                kubectl delete namespace "$ns" --wait=false # Using false to handle multiple NS in parallel
+            else
+                log_info "Status: Namespace '$ns' does not exist. No cleanup needed."
+            fi
+        done
+
+        # Wait for all targeted namespaces to be fully purged
+        for ns in $namespaces; do
+            while kubectl get namespace "$ns" >/dev/null 2>&1; do
+                log_info "Waiting for '$ns' to terminate..."
+                sleep 5
+            done
+        done
+        log_success "Cleanup Phase complete. Cluster is ready for restore."
+    fi
+
+    # 3. Execution
+    echo ""
+    draw_header "EXECUTION"
     log_info "Status: Submitting restore request and waiting for completion..."
     velero restore create "$restore_name" \
         --from-backup "$backup_name" \
         --wait
 
-    # 3. Verification Phase
+    # 4. Verification Phase
     echo ""
     draw_header "RESTORE VERIFICATION"
     
-    local restore_phase=$(velero restore get "$restore_name" -o jsonpath='{.status.phase}')
+    local restore_phase=$(velero restore get "$restore_name" -o json | jq -r '.status.phase')
 
     if [[ "$restore_phase" == "Completed" ]]; then
         log_success "Restore Task finalized successfully."
@@ -57,8 +84,7 @@ function execute-restore(){
         exit 1
     fi
 
-    # 4. Filesystem Data Check
-    # Since you are using Kopia, it is important to check the PodVolumeRestores
+    # 5. Filesystem Data Check
     log_info "Checking Pod Volume Restore status..."
     kubectl get podvolumerestores -n velero -l velero.io/restore-name="$restore_name" 2>/dev/null || log_info "No filesystem volumes to restore."
 }
