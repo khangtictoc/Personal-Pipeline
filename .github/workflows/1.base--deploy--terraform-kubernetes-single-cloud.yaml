@@ -131,13 +131,13 @@ on:
       terraform_action:
         description: "Choose Terraform Action"
         required: false
-        default: "apply"
+        default: "PLAN"
         type: choice
         options:
-          - plan
-          - apply
-          - plan-destroy
-          - destroy
+          - PLAN
+          - APPLY
+          - PLAN-DESTROY
+          - DESTROY
 
 env:
   # ---- SECRETS ----
