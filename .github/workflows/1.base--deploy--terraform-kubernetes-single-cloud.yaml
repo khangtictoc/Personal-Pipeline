@@ -151,6 +151,10 @@ env:
   HCP_CLIENT_ID: ${{ secrets.HCP_CLIENT_ID }}
   HCP_CLIENT_SECRET: ${{ secrets.HCP_CLIENT_SECRET }}
 
+  # ---- TERRAGRUNT ----
+  BACKEND_S3_BUCKET: ${{ vars.BACKEND_S3_BUCKET }}
+  TERRAGRUNT_OUTPUT_S3_BUCKET: ${{ vars.TERRAGRUNT_OUTPUT_S3_BUCKET }}
+
   # ---- ENVIRONMENT VARIABLES ----
 
   REGION: ${{ github.event.inputs.cloud_provider == 'aws' && github.event.inputs.region_aws || github.event.inputs.cloud_provider == 'azure' && github.event.inputs.region_azure || github.event.inputs.cloud_provider == 'hcp' && github.event.inputs.region_hcp || github.event.inputs.cloud_provider == 'kubenetes' && github.event.inputs.region_kubenetes }}
