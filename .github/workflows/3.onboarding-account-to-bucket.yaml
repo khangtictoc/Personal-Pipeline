@@ -1,0 +1,73 @@
+name: Onboard AWS Account to S3 Bucket
+
+on:
+  workflow_dispatch:
+    inputs:
+      accountID:
+        description: "AWS Account ID to grant access"
+        required: true
+        type: string
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.ADMIN_AWS_ACCESS_KEY }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.ADMIN_AWS_SECRET_KEY }}
+
+jobs:
+  onboard-account:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Add new account to bucket policy
+        run: |
+          ACCOUNT_ID=${{ github.event.inputs.accountID }}
+          BUCKET_NAME="velero-backup-kubernetes-aws"
+
+          # Try to get current bucket policy
+          if aws s3api get-bucket-policy --bucket $BUCKET_NAME --output json > current-policy.json 2>/dev/null; then
+            echo "✅ Existing policy found"
+            POLICY=$(cat current-policy.json | jq '.Policy | fromjson')
+          else
+            echo "⚠️  No existing policy, creating new one"
+            # Create empty policy structure
+            POLICY='{
+              "Version": "2012-10-17",
+              "Statement": []
+            }'
+          fi
+
+          # Check if account already exists
+          EXISTING=$(echo "$POLICY" | jq ".Statement[] | select(.Principal.AWS | contains(\"arn:aws:iam::${ACCOUNT_ID}:root\"))" 2>/dev/null)
+
+          if [ ! -z "$EXISTING" ]; then
+            echo "❌ Account $ACCOUNT_ID already has access"
+            exit 1
+          fi
+
+          # Add new statement to policy
+          NEW_POLICY=$(echo "$POLICY" | jq ".Statement += [{
+            \"Effect\": \"Allow\",
+            \"Principal\": {
+              \"AWS\": \"arn:aws:iam::${ACCOUNT_ID}:root\"
+            },
+            \"Action\": [
+              \"s3:GetObject\",
+              \"s3:ListBucket\"
+            ],
+            \"Resource\": [
+              \"arn:aws:s3:::${BUCKET_NAME}\",
+              \"arn:aws:s3:::${BUCKET_NAME}/*\"
+            ]
+          }]")
+
+          # Apply new policy
+          echo "$NEW_POLICY" | aws s3api put-bucket-policy \
+            --bucket $BUCKET_NAME \
+            --policy file:///dev/stdin
+
+          echo "✅ Account $ACCOUNT_ID added to bucket policy"
+
+      - name: Verify policy update
+        run: |
+          aws s3api get-bucket-policy \
+            --bucket velero-backup-kubernetes-aws \
+            --output json | jq '.Policy | fromjson | .Statement[] | select(.Principal.AWS | contains("${{ github.event.inputs.accountID }}"))'
