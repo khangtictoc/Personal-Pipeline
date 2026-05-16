@@ -1,4 +1,6 @@
-name: Onboard AWS Account to S3 Bucket
+name: "[3.0] Onboard AWS Account to S3 Bucket"
+
+run-name: "[3.0] Onboard AWS Account to S3 Bucket (Account ID: ${{ github.event.inputs.accountID }})"
 
 on:
   workflow_dispatch:
