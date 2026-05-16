@@ -21,7 +21,7 @@ env:
 
 jobs:
   validate-permissions:
-    name: 🔍 Validate Permissions
+    name: Validate Permissions
     runs-on: ubuntu-latest
 
     outputs:
@@ -31,7 +31,7 @@ jobs:
       source_size: ${{ steps.check-source.outputs.total_size }}
 
     steps:
-      - name: 📋 Initialize Workflow
+      - name: Initialize Workflow
         run: |
           echo "╔════════════════════════════════════════════════════════════╗"
           echo "║         S3 CROSS-ACCOUNT SYNC WITH VALIDATION              ║"
@@ -43,7 +43,7 @@ jobs:
           echo "║ Dry-run: ${{ github.event.inputs.dry_run }}"
           echo "╚════════════════════════════════════════════════════════════╝"
           echo ""
-          echo "🔄 SYNC CONFIGURATION:"
+          echo "SYNC CONFIGURATION:"
           echo "   Source: ${{ env.SOURCE_BUCKET }}"
           echo "   Destination: ${{ env.DEST_BUCKET }}"
           echo "   Region: ${{ env.AWS_REGION }}"
@@ -52,7 +52,7 @@ jobs:
       - name: Verify logged-in account
         run: |
           aws sts get-caller-identity
-      - name: 🔍 Check Source Bucket Accessibility
+      - name: Check Source Bucket Accessibility
         id: check-source
         run: |
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -65,38 +65,38 @@ jobs:
           # Test 1: Bucket exists and is accessible
           echo "  [1/4] Testing bucket accessibility..."
           if ! aws s3api head-bucket --bucket "$SOURCE_BUCKET" --region "$AWS_REGION" 2>/dev/null; then
-            echo "❌ FAILED: Cannot access source bucket '$SOURCE_BUCKET'"
+            echo "FAILED: Cannot access source bucket '$SOURCE_BUCKET'"
             echo "   - Bucket may not exist"
             echo "   - Cross-account permissions may be missing"
             echo "   - Bucket policy may deny access"
             exit 1
           fi
-          echo "  ✅ Bucket exists and is accessible"
+          echo "  Bucket exists and is accessible"
 
           # Test 2: ListBucket permission
           echo "  [2/4] Testing ListBucket permission..."
           if ! aws s3 ls "s3://$SOURCE_BUCKET" --region "$AWS_REGION" > /dev/null 2>&1; then
-            echo "❌ FAILED: Missing s3:ListBucket permission on source bucket"
+            echo "FAILED: Missing s3:ListBucket permission on source bucket"
             exit 1
           fi
-          echo "  ✅ ListBucket permission verified"
+          echo "  ListBucket permission verified"
 
           # Test 3: GetObject permission with test file
           echo "  [3/4] Testing GetObject permission..."
           TEST_FILE=$(aws s3 ls "s3://$SOURCE_BUCKET" --recursive --region "$AWS_REGION" | head -1 | awk '{print $NF}')
 
           if [ -z "$TEST_FILE" ]; then
-            echo "  ⚠️  WARNING: Bucket is empty, skipping GetObject test"
+            echo "  WARNING: Bucket is empty, skipping GetObject test"
           else
             if ! aws s3api get-object-attributes \
               --bucket "$SOURCE_BUCKET" \
               --key "$TEST_FILE" \
               --attributes ETag \
               --region "$AWS_REGION" > /dev/null 2>&1; then
-              echo "❌ FAILED: Missing s3:GetObject permission on source bucket"
+              echo "FAILED: Missing s3:GetObject permission on source bucket"
               exit 1
             fi
-            echo "  ✅ GetObject permission verified (tested with: $TEST_FILE)"
+            echo "  GetObject permission verified (tested with: $TEST_FILE)"
           fi
 
           # Test 4: Bucket statistics
@@ -109,7 +109,7 @@ jobs:
           fi
 
           echo ""
-          echo "📊 SOURCE BUCKET STATISTICS:"
+          echo "SOURCE BUCKET STATISTICS:"
           echo "   Objects: $OBJECT_COUNT"
           echo "   Total size: $(numfmt --to=iec-i --suffix=B $TOTAL_SIZE 2>/dev/null || echo $TOTAL_SIZE bytes)"
           echo ""
@@ -118,7 +118,7 @@ jobs:
           echo "object_count=$OBJECT_COUNT" >> $GITHUB_OUTPUT
           echo "total_size=$TOTAL_SIZE" >> $GITHUB_OUTPUT
 
-      - name: 🔓 Check Destination Bucket Accessibility
+      - name: Check Destination Bucket Accessibility
         id: check-dest
         run: |
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -131,20 +131,20 @@ jobs:
           # Test 1: Bucket exists and is accessible
           echo "  [1/4] Testing bucket accessibility..."
           if ! aws s3api head-bucket --bucket "$DEST_BUCKET" --region "$AWS_REGION" 2>/dev/null; then
-            echo "❌ FAILED: Cannot access destination bucket '$DEST_BUCKET'"
+            echo "FAILED: Cannot access destination bucket '$DEST_BUCKET'"
             echo "   - Bucket may not exist"
             echo "   - Insufficient permissions"
             exit 1
           fi
-          echo "  ✅ Bucket exists and is accessible"
+          echo "  Bucket exists and is accessible"
 
           # Test 2: ListBucket permission
           echo "  [2/4] Testing ListBucket permission..."
           if ! aws s3 ls "s3://$DEST_BUCKET" --region "$AWS_REGION" > /dev/null 2>&1; then
-            echo "❌ FAILED: Missing s3:ListBucket permission on destination bucket"
+            echo "FAILED: Missing s3:ListBucket permission on destination bucket"
             exit 1
           fi
-          echo "  ✅ ListBucket permission verified"
+          echo "  ListBucket permission verified"
 
           # Test 3: PutObject permission with test file
           echo "  [3/4] Testing PutObject permission..."
@@ -153,11 +153,11 @@ jobs:
 
           if ! aws s3 cp "$TEST_FILE" "s3://$DEST_BUCKET/.workflow-tests/permission-test-$RANDOM.txt" \
             --region "$AWS_REGION" > /dev/null 2>&1; then
-            echo "❌ FAILED: Missing s3:PutObject permission on destination bucket"
+            echo "FAILED: Missing s3:PutObject permission on destination bucket"
             rm -f "$TEST_FILE"
             exit 1
           fi
-          echo "  ✅ PutObject permission verified"
+          echo "  PutObject permission verified"
           rm -f "$TEST_FILE"
 
           # Test 4: Existing objects count
@@ -170,7 +170,7 @@ jobs:
           fi
 
           echo ""
-          echo "📊 DESTINATION BUCKET STATISTICS:"
+          echo "DESTINATION BUCKET STATISTICS:"
           echo "   Existing objects: $EXISTING_COUNT"
           echo "   Current size: $(numfmt --to=iec-i --suffix=B $EXISTING_SIZE 2>/dev/null || echo $EXISTING_SIZE bytes)"
           echo ""
@@ -179,7 +179,7 @@ jobs:
           echo "existing_count=$EXISTING_COUNT" >> $GITHUB_OUTPUT
 
   preview-sync:
-    name: 📋 Preview Changes (Dry-run)
+    name: Preview Changes (Dry-run)
     needs: validate-permissions
     runs-on: ubuntu-latest
     if: github.event.inputs.dry_run == 'true'
@@ -188,13 +188,13 @@ jobs:
       files_to_sync: ${{ steps.dry-run.outputs.files_to_sync }}
 
     steps:
-      - name: 🔐 Configure AWS Credentials
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: arn:aws:iam::ACCOUNT_B_ID:role/CrossAccountS3SyncRole
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: 🧪 Execute Dry-run Sync
+      - name: Execute Dry-run Sync
         id: dry-run
         run: |
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -237,10 +237,10 @@ jobs:
 
           echo "files_to_sync=$FILES_TO_SYNC" >> $GITHUB_OUTPUT
 
-      - name: 📝 Dry-run Summary
+      - name: Dry-run Summary
         run: |
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "✅ DRY-RUN COMPLETED"
+          echo "DRY-RUN COMPLETED"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo ""
           echo "Source bucket: ${{ env.SOURCE_BUCKET }}"
@@ -249,11 +249,11 @@ jobs:
           echo "Objects in source: ${{ needs.validate-permissions.outputs.source_count }}"
           echo "Files to sync: ${{ steps.dry-run.outputs.files_to_sync }}"
           echo ""
-          echo "💡 To actually sync, run this workflow again with dry_run: false"
+          echo "To actually sync, run this workflow again with dry_run: false"
           echo ""
 
   request-approval:
-    name: 🔐 Request Approval
+    name: Request Approval
     needs: validate-permissions
     runs-on: ubuntu-latest
     if: github.event.inputs.dry_run == 'false'
@@ -262,10 +262,10 @@ jobs:
       name: s3-sync-approval
 
     steps:
-      - name: ✋ Approval Required for Actual Sync
+      - name: Approval Required for Actual Sync
         run: |
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "⚠️  APPROVAL REQUIRED FOR ACTUAL DATA SYNC"
+          echo "APPROVAL REQUIRED FOR ACTUAL DATA SYNC"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo ""
           echo "Source bucket: ${{ env.SOURCE_BUCKET }}"
@@ -278,7 +278,7 @@ jobs:
           echo ""
 
   perform-sync:
-    name: 🔄 Perform Actual Sync
+    name: Perform Actual Sync
     needs: [validate-permissions, request-approval]
     runs-on: ubuntu-latest
     if: github.event.inputs.dry_run == 'false'
@@ -288,13 +288,13 @@ jobs:
       duration: ${{ steps.sync.outputs.duration }}
 
     steps:
-      - name: 🔐 Configure AWS Credentials
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: arn:aws:iam::ACCOUNT_B_ID:role/CrossAccountS3SyncRole
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: 🔄 Execute Actual Sync
+      - name: Execute Actual Sync
         id: sync
         run: |
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -321,7 +321,7 @@ jobs:
           DURATION=$((END_TIME - START_TIME))
 
           if [ $SYNC_EXIT_CODE -ne 0 ]; then
-            echo "❌ SYNC FAILED with exit code $SYNC_EXIT_CODE"
+            echo "SYNC FAILED with exit code $SYNC_EXIT_CODE"
             echo ""
             echo "Error output:"
             echo "$SYNC_OUTPUT"
@@ -330,9 +330,9 @@ jobs:
 
           FILES_SYNCED=$(echo "$SYNC_OUTPUT" | grep -c "upload:" || echo "0")
 
-          echo "✅ SYNC COMPLETED SUCCESSFULLY"
+          echo "SYNC COMPLETED SUCCESSFULLY"
           echo ""
-          echo "📊 SYNC STATISTICS:"
+          echo "SYNC STATISTICS:"
           echo "   Files synced: $FILES_SYNCED"
           echo "   Duration: ${DURATION}s"
           echo ""
@@ -340,7 +340,7 @@ jobs:
           echo "files_synced=$FILES_SYNCED" >> $GITHUB_OUTPUT
           echo "duration=$DURATION" >> $GITHUB_OUTPUT
 
-      - name: ✔️ Verify Sync Integrity
+      - name: Verify Sync Integrity
         run: |
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo "STEP 5: VERIFYING SYNC INTEGRITY"
@@ -360,27 +360,27 @@ jobs:
           echo "  Destination: $DEST_COUNT objects"
 
           if [ "$SOURCE_COUNT" -eq "$DEST_COUNT" ]; then
-            echo "  ✅ Object count matches"
+            echo "  Object count matches"
           else
-            echo "  ⚠️  WARNING: Object count mismatch"
+            echo "  WARNING: Object count mismatch"
             echo "     Difference: $((SOURCE_COUNT - DEST_COUNT)) objects"
           fi
 
           echo ""
 
-      - name: 📝 Sync Complete Report
+      - name: Sync Complete Report
         run: |
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "✅ SYNC COMPLETED SUCCESSFULLY"
+          echo "SYNC COMPLETED SUCCESSFULLY"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo ""
-          echo "📋 EXECUTION SUMMARY:"
+          echo "EXECUTION SUMMARY:"
           echo "   Workflow: ${{ github.workflow }}"
           echo "   Run ID: ${{ github.run_id }}"
           echo "   Actor: ${{ github.actor }}"
           echo "   Timestamp: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
           echo ""
-          echo "🔄 SYNC DETAILS:"
+          echo "SYNC DETAILS:"
           echo "   Source: ${{ env.SOURCE_BUCKET }}"
           echo "   Destination: ${{ env.DEST_BUCKET }}"
           echo "   Files synced: ${{ steps.sync.outputs.files_synced }}"
@@ -390,15 +390,15 @@ jobs:
           echo ""
 
   failure-report:
-    name: ❌ Failure Report
+    name: Failure Report
     runs-on: ubuntu-latest
     if: failure()
 
     steps:
-      - name: 📤 Report Failure
+      - name: Report Failure
         run: |
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "❌ WORKFLOW FAILED"
+          echo "WORKFLOW FAILED"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo ""
           echo "Review the steps above to identify the failure point:"
