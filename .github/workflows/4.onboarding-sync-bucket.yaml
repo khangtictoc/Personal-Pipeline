@@ -1,4 +1,4 @@
-name: "[4.0] S3 Cross-Account Sync with Permission Validation"
+name: "[4.0] S3 Cross-Account Sync"
 
 on:
   workflow_dispatch:
@@ -10,407 +10,53 @@ on:
         default: true
 
 env:
-  LOG_LEVEL: INFO
-  TIMESTAMP: ${{ github.run_id }}-${{ github.run_number }}
   SOURCE_BUCKET: velero-backup-kubernetes-aws
   DEST_BUCKET: velero-backup-kubernetes-aws-454879
   AWS_REGION: us-east-1
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_PAGER: ""
 
 jobs:
-  validate-permissions:
-    name: Validate Permissions
+  s3-sync:
     runs-on: ubuntu-latest
 
-    outputs:
-      source_ok: ${{ steps.check-source.outputs.status }}
-      dest_ok: ${{ steps.check-dest.outputs.status }}
-      source_count: ${{ steps.check-source.outputs.object_count }}
-      source_size: ${{ steps.check-source.outputs.total_size }}
-
     steps:
-      - name: Initialize Workflow
-        run: |
-          echo "╔════════════════════════════════════════════════════════════╗"
-          echo "║         S3 CROSS-ACCOUNT SYNC WITH VALIDATION              ║"
-          echo "╠════════════════════════════════════════════════════════════╣"
-          echo "║ Timestamp: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
-          echo "║ Workflow: ${{ github.workflow }}"
-          echo "║ Run ID: ${{ github.run_id }}"
-          echo "║ Actor: ${{ github.actor }}"
-          echo "║ Dry-run: ${{ github.event.inputs.dry_run }}"
-          echo "╚════════════════════════════════════════════════════════════╝"
-          echo ""
-          echo "SYNC CONFIGURATION:"
-          echo "   Source: ${{ env.SOURCE_BUCKET }}"
-          echo "   Destination: ${{ env.DEST_BUCKET }}"
-          echo "   Region: ${{ env.AWS_REGION }}"
-          echo ""
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-      - name: Verify logged-in account
+      - name: Verify AWS credentials
         run: |
+          echo "Verifying AWS credentials by getting caller identity"
           aws sts get-caller-identity
-      - name: Check Source Bucket Accessibility
-        id: check-source
+
+      - name: Verify source bucket list access
         run: |
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "STEP 1: VALIDATING SOURCE BUCKET PERMISSIONS"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "Verifying source bucket list access"
+          aws s3 ls "s3://${{ env.SOURCE_BUCKET }}" --region "${{ env.AWS_REGION }}"
 
-          SOURCE_BUCKET="${{ env.SOURCE_BUCKET }}"
-          AWS_REGION="${{ env.AWS_REGION }}"
-
-          # Test 1: Bucket exists and is accessible
-          echo "  [1/4] Testing bucket accessibility..."
-          if ! aws s3api head-bucket --bucket "$SOURCE_BUCKET" --region "$AWS_REGION" 2>/dev/null; then
-            echo "FAILED: Cannot access source bucket '$SOURCE_BUCKET'"
-            echo "   - Bucket may not exist"
-            echo "   - Cross-account permissions may be missing"
-            echo "   - Bucket policy may deny access"
-            exit 1
-          fi
-          echo "  Bucket exists and is accessible"
-
-          # Test 2: ListBucket permission
-          echo "  [2/4] Testing ListBucket permission..."
-          if ! aws s3 ls "s3://$SOURCE_BUCKET" --region "$AWS_REGION" > /dev/null 2>&1; then
-            echo "FAILED: Missing s3:ListBucket permission on source bucket"
-            exit 1
-          fi
-          echo "  ListBucket permission verified"
-
-          # Test 3: GetObject permission with test file
-          echo "  [3/4] Testing GetObject permission..."
-          TEST_FILE=$(aws s3 ls "s3://$SOURCE_BUCKET" --recursive --region "$AWS_REGION" | head -1 | awk '{print $NF}')
-
-          if [ -z "$TEST_FILE" ]; then
-            echo "  WARNING: Bucket is empty, skipping GetObject test"
-          else
-            if ! aws s3api get-object-attributes \
-              --bucket "$SOURCE_BUCKET" \
-              --key "$TEST_FILE" \
-              --attributes ETag \
-              --region "$AWS_REGION" > /dev/null 2>&1; then
-              echo "FAILED: Missing s3:GetObject permission on source bucket"
-              exit 1
-            fi
-            echo "  GetObject permission verified (tested with: $TEST_FILE)"
-          fi
-
-          # Test 4: Bucket statistics
-          echo "  [4/4] Gathering bucket statistics..."
-          OBJECT_COUNT=$(aws s3 ls "s3://$SOURCE_BUCKET" --recursive --region "$AWS_REGION" | wc -l)
-          TOTAL_SIZE=$(aws s3 ls "s3://$SOURCE_BUCKET" --recursive --summarize --region "$AWS_REGION" | grep "Total Size" | awk '{print $3}')
-
-          if [ -z "$TOTAL_SIZE" ]; then
-            TOTAL_SIZE="0"
-          fi
-
-          echo ""
-          echo "SOURCE BUCKET STATISTICS:"
-          echo "   Objects: $OBJECT_COUNT"
-          echo "   Total size: $(numfmt --to=iec-i --suffix=B $TOTAL_SIZE 2>/dev/null || echo $TOTAL_SIZE bytes)"
-          echo ""
-
-          echo "status=PASSED" >> $GITHUB_OUTPUT
-          echo "object_count=$OBJECT_COUNT" >> $GITHUB_OUTPUT
-          echo "total_size=$TOTAL_SIZE" >> $GITHUB_OUTPUT
-
-      - name: Check Destination Bucket Accessibility
-        id: check-dest
+      - name: Verify target bucket write/delete test
         run: |
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "STEP 2: VALIDATING DESTINATION BUCKET PERMISSIONS"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          TEST_FILE="/tmp/s3-target-test-$(date +%s).txt"
+          TARGET_KEY=".workflow-tests/test.txt"
+          echo "s3 target test" > "$TEST_FILE"
 
-          DEST_BUCKET="${{ env.DEST_BUCKET }}"
-          AWS_REGION="${{ env.AWS_REGION }}"
+          echo "Uploading test file to target bucket"
+          aws s3 cp "$TEST_FILE" "s3://${{ env.DEST_BUCKET }}/$TARGET_KEY" --region "${{ env.AWS_REGION }}"
 
-          # Test 1: Bucket exists and is accessible
-          echo "  [1/4] Testing bucket accessibility..."
-          if ! aws s3api head-bucket --bucket "$DEST_BUCKET" --region "$AWS_REGION" 2>/dev/null; then
-            echo "FAILED: Cannot access destination bucket '$DEST_BUCKET'"
-            echo "   - Bucket may not exist"
-            echo "   - Insufficient permissions"
-            exit 1
-          fi
-          echo "  Bucket exists and is accessible"
+          echo "Deleting test file from target bucket"
+          aws s3 rm "s3://${{ env.DEST_BUCKET }}/$TARGET_KEY" --region "${{ env.AWS_REGION }}"
 
-          # Test 2: ListBucket permission
-          echo "  [2/4] Testing ListBucket permission..."
-          if ! aws s3 ls "s3://$DEST_BUCKET" --region "$AWS_REGION" > /dev/null 2>&1; then
-            echo "FAILED: Missing s3:ListBucket permission on destination bucket"
-            exit 1
-          fi
-          echo "  ListBucket permission verified"
-
-          # Test 3: PutObject permission with test file
-          echo "  [3/4] Testing PutObject permission..."
-          TEST_FILE="/tmp/permission-test-$RANDOM.txt"
-          echo "Permission test at $(date -u +'%Y-%m-%d %H:%M:%S UTC')" > "$TEST_FILE"
-
-          if ! aws s3 cp "$TEST_FILE" "s3://$DEST_BUCKET/.workflow-tests/permission-test-$RANDOM.txt" \
-            --region "$AWS_REGION" > /dev/null 2>&1; then
-            echo "FAILED: Missing s3:PutObject permission on destination bucket"
-            rm -f "$TEST_FILE"
-            exit 1
-          fi
-          echo "  PutObject permission verified"
           rm -f "$TEST_FILE"
 
-          # Test 4: Existing objects count
-          echo "  [4/4] Gathering bucket statistics..."
-          EXISTING_COUNT=$(aws s3 ls "s3://$DEST_BUCKET" --recursive --region "$AWS_REGION" | wc -l)
-          EXISTING_SIZE=$(aws s3 ls "s3://$DEST_BUCKET" --recursive --summarize --region "$AWS_REGION" | grep "Total Size" | awk '{print $3}')
-
-          if [ -z "$EXISTING_SIZE" ]; then
-            EXISTING_SIZE="0"
-          fi
-
-          echo ""
-          echo "DESTINATION BUCKET STATISTICS:"
-          echo "   Existing objects: $EXISTING_COUNT"
-          echo "   Current size: $(numfmt --to=iec-i --suffix=B $EXISTING_SIZE 2>/dev/null || echo $EXISTING_SIZE bytes)"
-          echo ""
-
-          echo "status=PASSED" >> $GITHUB_OUTPUT
-          echo "existing_count=$EXISTING_COUNT" >> $GITHUB_OUTPUT
-
-  preview-sync:
-    name: Preview Changes (Dry-run)
-    needs: validate-permissions
-    runs-on: ubuntu-latest
-    if: github.event.inputs.dry_run == 'true'
-
-    outputs:
-      files_to_sync: ${{ steps.dry-run.outputs.files_to_sync }}
-
-    steps:
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam::ACCOUNT_B_ID:role/CrossAccountS3SyncRole
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Execute Dry-run Sync
-        id: dry-run
+      - name: Sync source to destination
         run: |
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "STEP 3: DRY-RUN PREVIEW (NO ACTUAL CHANGES)"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-          SOURCE_BUCKET="${{ env.SOURCE_BUCKET }}"
-          DEST_BUCKET="${{ env.DEST_BUCKET }}"
-          AWS_REGION="${{ env.AWS_REGION }}"
-
-          echo ""
-          echo "  Running: aws s3 sync --dryrun"
-          echo ""
-
-          DRY_RUN_OUTPUT=$(aws s3 sync \
-            "s3://$SOURCE_BUCKET" \
-            "s3://$DEST_BUCKET" \
-            --region "$AWS_REGION" \
-            --dryrun 2>&1)
-
-          FILES_TO_SYNC=$(echo "$DRY_RUN_OUTPUT" | grep -c "upload:" || echo "0")
-
-          if [ "$FILES_TO_SYNC" -eq 0 ]; then
-            echo "✅ RESULT: All files are already in sync"
-            echo "   No changes needed"
-            echo ""
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            echo "Dry run: showing what would be synced"
+            aws s3 sync "s3://${{ env.SOURCE_BUCKET }}" "s3://${{ env.DEST_BUCKET }}" --region "${{ env.AWS_REGION }}" --dryrun
           else
-            echo "📋 PREVIEW: Files that would be synced:"
-            echo ""
-            echo "$DRY_RUN_OUTPUT" | grep "upload:" | head -20 | sed 's/^/   /'
-            
-            if [ "$FILES_TO_SYNC" -gt 20 ]; then
-              echo "   ... and $((FILES_TO_SYNC - 20)) more files"
-            fi
-            echo ""
-            echo "📊 SUMMARY:"
-            echo "   Files to sync: $FILES_TO_SYNC"
-            echo ""
+            echo "Running actual sync"
+            aws s3 sync "s3://${{ env.SOURCE_BUCKET }}" "s3://${{ env.DEST_BUCKET }}" --region "${{ env.AWS_REGION }}"
           fi
-
-          echo "files_to_sync=$FILES_TO_SYNC" >> $GITHUB_OUTPUT
-
-      - name: Dry-run Summary
-        run: |
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "DRY-RUN COMPLETED"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo ""
-          echo "Source bucket: ${{ env.SOURCE_BUCKET }}"
-          echo "Destination bucket: ${{ env.DEST_BUCKET }}"
-          echo ""
-          echo "Objects in source: ${{ needs.validate-permissions.outputs.source_count }}"
-          echo "Files to sync: ${{ steps.dry-run.outputs.files_to_sync }}"
-          echo ""
-          echo "To actually sync, run this workflow again with dry_run: false"
-          echo ""
-
-  request-approval:
-    name: Request Approval
-    needs: validate-permissions
-    runs-on: ubuntu-latest
-    if: github.event.inputs.dry_run == 'false'
-
-    environment:
-      name: s3-sync-approval
-
-    steps:
-      - name: Approval Required for Actual Sync
-        run: |
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "APPROVAL REQUIRED FOR ACTUAL DATA SYNC"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo ""
-          echo "Source bucket: ${{ env.SOURCE_BUCKET }}"
-          echo "Destination bucket: ${{ env.DEST_BUCKET }}"
-          echo "Objects in source: ${{ needs.validate-permissions.outputs.source_count }}"
-          echo ""
-          echo "This action will modify ${{ env.DEST_BUCKET }}"
-          echo ""
-          echo "To approve, check the deployment in the GitHub Actions UI"
-          echo ""
-
-  perform-sync:
-    name: Perform Actual Sync
-    needs: [validate-permissions, request-approval]
-    runs-on: ubuntu-latest
-    if: github.event.inputs.dry_run == 'false'
-
-    outputs:
-      files_synced: ${{ steps.sync.outputs.files_synced }}
-      duration: ${{ steps.sync.outputs.duration }}
-
-    steps:
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam::ACCOUNT_B_ID:role/CrossAccountS3SyncRole
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Execute Actual Sync
-        id: sync
-        run: |
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "STEP 4: EXECUTING ACTUAL SYNC"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-          SOURCE_BUCKET="${{ env.SOURCE_BUCKET }}"
-          DEST_BUCKET="${{ env.DEST_BUCKET }}"
-          AWS_REGION="${{ env.AWS_REGION }}"
-
-          echo ""
-          echo "  Starting sync: $SOURCE_BUCKET → $DEST_BUCKET"
-          echo ""
-
-          START_TIME=$(date +%s)
-
-          SYNC_OUTPUT=$(aws s3 sync \
-            "s3://$SOURCE_BUCKET" \
-            "s3://$DEST_BUCKET" \
-            --region "$AWS_REGION" 2>&1)
-
-          SYNC_EXIT_CODE=$?
-          END_TIME=$(date +%s)
-          DURATION=$((END_TIME - START_TIME))
-
-          if [ $SYNC_EXIT_CODE -ne 0 ]; then
-            echo "SYNC FAILED with exit code $SYNC_EXIT_CODE"
-            echo ""
-            echo "Error output:"
-            echo "$SYNC_OUTPUT"
-            exit 1
-          fi
-
-          FILES_SYNCED=$(echo "$SYNC_OUTPUT" | grep -c "upload:" || echo "0")
-
-          echo "SYNC COMPLETED SUCCESSFULLY"
-          echo ""
-          echo "SYNC STATISTICS:"
-          echo "   Files synced: $FILES_SYNCED"
-          echo "   Duration: ${DURATION}s"
-          echo ""
-
-          echo "files_synced=$FILES_SYNCED" >> $GITHUB_OUTPUT
-          echo "duration=$DURATION" >> $GITHUB_OUTPUT
-
-      - name: Verify Sync Integrity
-        run: |
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "STEP 5: VERIFYING SYNC INTEGRITY"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-
-          SOURCE_BUCKET="${{ env.SOURCE_BUCKET }}"
-          DEST_BUCKET="${{ env.DEST_BUCKET }}"
-          AWS_REGION="${{ env.AWS_REGION }}"
-
-          echo ""
-          echo "  Comparing object counts..."
-
-          SOURCE_COUNT=$(aws s3 ls "s3://$SOURCE_BUCKET" --recursive --region "$AWS_REGION" | wc -l)
-          DEST_COUNT=$(aws s3 ls "s3://$DEST_BUCKET" --recursive --region "$AWS_REGION" | wc -l)
-
-          echo "  Source: $SOURCE_COUNT objects"
-          echo "  Destination: $DEST_COUNT objects"
-
-          if [ "$SOURCE_COUNT" -eq "$DEST_COUNT" ]; then
-            echo "  Object count matches"
-          else
-            echo "  WARNING: Object count mismatch"
-            echo "     Difference: $((SOURCE_COUNT - DEST_COUNT)) objects"
-          fi
-
-          echo ""
-
-      - name: Sync Complete Report
-        run: |
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "SYNC COMPLETED SUCCESSFULLY"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo ""
-          echo "EXECUTION SUMMARY:"
-          echo "   Workflow: ${{ github.workflow }}"
-          echo "   Run ID: ${{ github.run_id }}"
-          echo "   Actor: ${{ github.actor }}"
-          echo "   Timestamp: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
-          echo ""
-          echo "SYNC DETAILS:"
-          echo "   Source: ${{ env.SOURCE_BUCKET }}"
-          echo "   Destination: ${{ env.DEST_BUCKET }}"
-          echo "   Files synced: ${{ steps.sync.outputs.files_synced }}"
-          echo "   Duration: ${{ steps.sync.outputs.duration }}s"
-          echo ""
-          echo "╚════════════════════════════════════════════════════════════╝"
-          echo ""
-
-  failure-report:
-    name: Failure Report
-    runs-on: ubuntu-latest
-    if: failure()
-
-    steps:
-      - name: Report Failure
-        run: |
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "WORKFLOW FAILED"
-          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo ""
-          echo "Review the steps above to identify the failure point:"
-          echo "  1. Validate Permissions → Check IAM role and bucket policies"
-          echo "  2. Preview Changes → Review what would be synced"
-          echo "  3. Request Approval → Approval may have been denied"
-          echo "  4. Perform Sync → Check IAM permissions or network"
-          echo ""
-          echo "Troubleshooting:"
-          echo "  - Verify AWS credentials are correct"
-          echo "  - Check cross-account IAM role exists"
-          echo "  - Verify source bucket policy allows Account B access"
-          echo "  - Check destination bucket exists and is writable"
-          echo ""
-          exit 1
