@@ -17,6 +17,7 @@ env:
   AWS_REGION: us-east-1
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_PAGER: ""
 
 jobs:
   validate-permissions:
@@ -48,6 +49,9 @@ jobs:
           echo "   Region: ${{ env.AWS_REGION }}"
           echo ""
 
+      - name: Verify logged-in account
+        run: |
+          aws sts get-caller-identity
       - name: 🔍 Check Source Bucket Accessibility
         id: check-source
         run: |
