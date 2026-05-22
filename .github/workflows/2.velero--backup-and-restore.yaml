@@ -194,9 +194,11 @@ jobs:
         run: |
           ./$BACKUP_SH "${{ github.event.inputs.cluster_name }}" "$SELECTED_NS"
           ./$RECONCILE_SH $GITHUB_REPOSITORY
+          
       - name: "Action: Run Restore"
         if: github.event.inputs.action == 'restore'
         run: ./$RESTORE_SH "${{ github.event.inputs.restored_version }}"
+
       - name: "Action: Run Reconcile"
         if: github.event.inputs.action == 'reconcile'
         run: ./$RECONCILE_SH $GITHUB_REPOSITORY

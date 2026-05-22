@@ -16,12 +16,12 @@ function reconcile-backup-versions(){
     # Use JSON output and jq to sort by 'startTimestamp' descending
     # This avoids the unsupported --sort-column flag entirely
     versions=$(velero backup get -o json | jq -r '
-        .items 
+        (if type == "array" then . else [.] end)
         | map(select(.status.phase == "Completed")) 
         | sort_by(.status.startTimestamp) 
         | reverse 
         | .[:10] 
-        | .[].metadata.name' 2>/dev/null)
+        | .[]?.metadata.name // empty' 2>/dev/null)
 
     if [ -z "$versions" ]; then
         log_error "No 'Completed' backups found in the Velero registry."
