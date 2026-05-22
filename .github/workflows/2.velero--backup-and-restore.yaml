@@ -48,15 +48,6 @@ on:
         type: choice
         options:
           - testproject-dev-general-00-2026.04.14-13.27.07
-          - testproject-dev-general-00-2026.04.14-06.03.47
-          - testproject-dev-general-00-2026.04.14-05.36.09
-          - testproject-dev-general-00-2026.04.14-05.32.09
-          - jenkins-data-only6
-          - jenkins-data-only5
-          - jenkins-data-only4
-          - jenkins-data-only3
-          - jenkins-data-only2
-          - jenkins-data-only
         default: testproject-dev-general-00-2026.04.14-13.27.07
       # --- NAMESPACE SELECTION (BOOLEANS) ---
       backup_jenkins:
@@ -194,11 +185,9 @@ jobs:
         run: |
           ./$BACKUP_SH "${{ github.event.inputs.cluster_name }}" "$SELECTED_NS"
           ./$RECONCILE_SH $GITHUB_REPOSITORY
-          
       - name: "Action: Run Restore"
         if: github.event.inputs.action == 'restore'
         run: ./$RESTORE_SH "${{ github.event.inputs.restored_version }}"
-
       - name: "Action: Run Reconcile"
         if: github.event.inputs.action == 'reconcile'
         run: ./$RECONCILE_SH $GITHUB_REPOSITORY
