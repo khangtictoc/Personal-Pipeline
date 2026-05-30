@@ -3,6 +3,25 @@ name: "[4.0] S3 Cross-Account Sync"
 on:
   workflow_dispatch:
     inputs:
+      source_bucket:
+        description: "Source S3 bucket name"
+        required: false
+        type: string
+        default: velero-backup-kubernetes-aws
+      dest_bucket:
+        description: "Destination S3 bucket name"
+        required: false
+        type: string
+        default: velero-backup-kubernetes-aws-454879
+      region:
+        description: "AWS region"
+        required: false
+        type: choice
+        options:
+          - us-east-1
+          - us-west-2
+          - eu-west-1
+        default: us-east-1
       dry_run:
         description: "Run in dry-run mode (preview changes only)"
         required: false
@@ -10,9 +29,9 @@ on:
         default: true
 
 env:
-  SOURCE_BUCKET: velero-backup-kubernetes-aws
-  DEST_BUCKET: velero-backup-kubernetes-aws-454879
-  AWS_REGION: us-east-1
+  SOURCE_BUCKET: ${{ github.event.inputs.source_bucket }}
+  DEST_BUCKET: ${{ github.event.inputs.dest_bucket }}
+  AWS_REGION: ${{ github.event.inputs.region }}
   AWS_PAGER: ""
 
 jobs:
