@@ -16,11 +16,11 @@ function reconcile-backup-versions(){
     # Use JSON output and jq to sort by 'startTimestamp' descending
     # This avoids the unsupported --sort-column flag entirely
     versions=$(velero backup get -o json | jq -r '
-        (if type == "array" then . else [.] end)
+        (.items? // .)                          # unwrap .items if present, else use raw
         | map(select(.status.phase == "Completed")) 
         | sort_by(.status.startTimestamp) 
         | reverse 
-        | .[:10] 
+        | .[:'"$PAGER_SIZE"'] 
         | .[]?.metadata.name // empty' 2>/dev/null)
 
     if [ -z "$versions" ]; then
