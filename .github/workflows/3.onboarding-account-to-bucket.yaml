@@ -9,6 +9,16 @@ on:
         description: "AWS Account ID to grant access"
         required: true
         type: string
+      bucketName:
+        description: "S3 Bucket Name"
+        required: true
+        type: string
+        default: "velero-backup-kubernetes-aws-454879"
+      region:
+        description: "AWS Region"
+        required: true
+        type: string
+        default: "us-east-1"
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.ADMIN_AWS_ACCESS_KEY }}
@@ -22,10 +32,11 @@ jobs:
       - name: Add new account to bucket policy
         run: |
           ACCOUNT_ID=${{ github.event.inputs.accountID }}
-          BUCKET_NAME="velero-backup-kubernetes-aws"
+          BUCKET_NAME=${{ github.event.inputs.bucketName }}
+          REGION=${{ github.event.inputs.region }}
 
           # Try to get current bucket policy
-          if aws s3api get-bucket-policy --bucket $BUCKET_NAME --output json > current-policy.json 2>/dev/null; then
+          if aws s3api get-bucket-policy --bucket "$BUCKET_NAME" --region "$REGION" --output json > current-policy.json 2>/dev/null; then
             echo "✅ Existing policy found"
             POLICY=$(cat current-policy.json | jq '.Policy | fromjson')
           else
@@ -63,7 +74,8 @@ jobs:
 
           # Apply new policy
           echo "$NEW_POLICY" | aws s3api put-bucket-policy \
-            --bucket $BUCKET_NAME \
+            --bucket "$BUCKET_NAME" \
+            --region "$REGION" \
             --policy file:///dev/stdin
 
           echo "✅ Account $ACCOUNT_ID added to bucket policy"
@@ -71,5 +83,6 @@ jobs:
       - name: Verify policy update
         run: |
           aws s3api get-bucket-policy \
-            --bucket velero-backup-kubernetes-aws \
+            --bucket "${{ github.event.inputs.bucketName }}" \
+            --region "${{ github.event.inputs.region }}" \
             --output json | jq '.Policy | fromjson | .Statement[] | select(.Principal.AWS | contains("${{ github.event.inputs.accountID }}"))'
