@@ -5,6 +5,63 @@
 # Usage: ./restore.sh <backup_name>
 # ==============================================================================
 
+function force-delete-stuck-namespaces() {
+    local timeout=${1:-300}  # default 5 minutes
+    shift
+    local namespaces="$@"
+
+    local stuck_namespaces=()
+    local start_time=$(date +%s)
+
+    log_info "Waiting up to ${timeout}s for namespaces to terminate..."
+
+    for ns in $namespaces; do
+        while kubectl get namespace "$ns" >/dev/null 2>&1; do
+            local now=$(date +%s)
+            local elapsed=$((now - start_time))
+            if [[ "$elapsed" -ge "$timeout" ]]; then
+                log_warn "Timeout reached: namespace '$ns' still terminating – forcing finalizer removal."
+                stuck_namespaces+=("$ns")
+                break
+            fi
+            sleep 5
+        done
+    done
+
+    if [[ ${#stuck_namespaces[@]} -eq 0 ]]; then
+        return 0
+    fi
+
+    log_warn "Force-removing finalizers for stuck namespaces: ${stuck_namespaces[*]}..."
+
+    kubectl proxy --port=8001 &
+    local proxy_pid=$!
+    sleep 2
+
+    for ns in "${stuck_namespaces[@]}"; do
+        log_info "Purging finalizers from namespace '$ns'..."
+        kubectl get namespace "$ns" -o json | jq '.spec = {"finalizers":[]}' > "/tmp/ns-${ns}-finalize.json"
+        curl -s -k -H "Content-Type: application/json" \
+             -X PUT \
+             --data-binary @"/tmp/ns-${ns}-finalize.json" \
+             "http://127.0.0.1:8001/api/v1/namespaces/${ns}/finalize" \
+             > /dev/null 2>&1
+        rm -f "/tmp/ns-${ns}-finalize.json"
+    done
+
+    kill "$proxy_pid" 2>/dev/null
+    wait "$proxy_pid" 2>/dev/null
+
+    sleep 10
+    for ns in "${stuck_namespaces[@]}"; do
+        if kubectl get namespace "$ns" >/dev/null 2>&1; then
+            log_error "Namespace '$ns' could not be removed even after finalizer purge."
+        else
+            log_success "Namespace '$ns' successfully removed."
+        fi
+    done
+}
+
 function draw_header() {
     local title=$1
     log_highlight "--------------------------------------------------------"
@@ -51,12 +108,7 @@ function execute-restore(){
         done
 
         # Wait for all targeted namespaces to be fully purged
-        for ns in $namespaces; do
-            while kubectl get namespace "$ns" >/dev/null 2>&1; do
-                log_info "Waiting for '$ns' to terminate..."
-                sleep 5
-            done
-        done
+        force-delete-stuck-namespaces 300 $namespaces
         log_success "Cleanup Phase complete. Cluster is ready for restore."
     fi
 
